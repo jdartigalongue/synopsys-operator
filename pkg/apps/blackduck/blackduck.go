@@ -23,14 +23,13 @@ package blackduck
 
 import (
 	"fmt"
+	v12 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/creater/v1"
 	"sort"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
-	latestblackduck "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/latest"
-	v1blackduck "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/v1"
 	blackduckclientset "github.com/blackducksoftware/synopsys-operator/pkg/blackduck/client/clientset/versioned"
 	"github.com/blackducksoftware/synopsys-operator/pkg/protoform"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
@@ -77,8 +76,9 @@ func NewBlackduck(config *protoform.Config, kubeConfig *rest.Config) *Blackduck 
 	routeClient := util.GetRouteClient(kubeConfig)
 
 	creaters := []Creater{
-		v1blackduck.NewCreater(config, kubeConfig, kubeclient, blackduckClient, osClient, routeClient),
-		latestblackduck.NewCreater(config, kubeConfig, kubeclient, blackduckClient, osClient, routeClient),
+		v12.NewCreater(config, kubeConfig,kubeclient,blackduckClient),
+		//v1blackduck.NewCreater(config, kubeConfig, kubeclient, blackduckClient, osClient, routeClient),
+		//latestblackduck.NewCreater(config, kubeConfig, kubeclient, blackduckClient, osClient, routeClient),
 	}
 
 	return &Blackduck{
