@@ -97,7 +97,9 @@ func (hc *Creater) GetComponents(blackduck *blackduckapi.Blackduck, bd Blackduck
 	// Services
 	var services []*components.Service
 	for _, v := range bd.Service {
-		services = append(services, v(blackduck).GetService())
+		if v != nil {
+			services = append(services, v(blackduck).GetService())
+		}
 	}
 
 	//Configmap

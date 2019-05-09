@@ -55,7 +55,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 
 	uploadCacheContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "uploadcache", Image: containerConfig.Image,
-			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%dm", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%dm", containerConfig.MinCPU)},
+			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfig.MinCPU)},
 		EnvConfigs: []*horizonapi.EnvConfig{
 			c.GetHubConfigEnv(),
 			// {NameOrPrefix: "SEAL_KEY", Type: horizonapi.EnvFromSecret, KeyOrVal: "SEAL_KEY", FromName: "upload-cache"},

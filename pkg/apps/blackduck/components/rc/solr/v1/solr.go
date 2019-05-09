@@ -53,7 +53,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	solrVolumeMount := c.getSolrVolumeMounts()
 	solrContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "solr", Image: containerConfig.Image,
-			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%dm", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%dm", containerConfig.MinCPU)},
+			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfig.MinCPU)},
 		EnvConfigs:   []*horizonapi.EnvConfig{c.GetHubConfigEnv()},
 		VolumeMounts: solrVolumeMount,
 		PortConfig:   []*horizonapi.PortConfig{{ContainerPort: "8983", Protocol: horizonapi.ProtocolTCP}},

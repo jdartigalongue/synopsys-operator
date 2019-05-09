@@ -39,7 +39,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	jobRunnerEnvs = append(jobRunnerEnvs, &horizonapi.EnvConfig{Type: horizonapi.EnvVal, NameOrPrefix: "HUB_MAX_MEMORY", KeyOrVal: fmt.Sprintf("%dM",containerConfig.MaxMem - 512)})
 	jobRunnerContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "jobrunner", Image: containerConfig.Image,
-			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM",containerConfig.MaxMem), MinCPU: fmt.Sprintf("%dm", containerConfig.MinCPU), MaxCPU:fmt.Sprintf("%dm", containerConfig.MaxCPU)},
+			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM",containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU:fmt.Sprintf("%d", containerConfig.MaxCPU)},
 		EnvConfigs: jobRunnerEnvs,
 		VolumeMounts: []*horizonapi.VolumeMountConfig{
 			{Name: "db-passwords", MountPath: "/tmp/secrets/HUB_POSTGRES_ADMIN_PASSWORD_FILE", SubPath: "HUB_POSTGRES_ADMIN_PASSWORD_FILE"},

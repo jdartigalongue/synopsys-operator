@@ -56,7 +56,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 
 	zookeeperContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "zookeeper", Image: containerConfig.Image,
-			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM",containerConfig.MaxMem), MinCPU: fmt.Sprintf("%dm", containerConfig.MinCPU), MaxCPU:fmt.Sprintf("%dm", containerConfig.MaxCPU)},
+			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM",containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU:fmt.Sprintf("%d", containerConfig.MaxCPU)},
 		EnvConfigs:   []*horizonapi.EnvConfig{c.GetHubConfigEnv()},
 		VolumeMounts: volumeMounts,
 		PortConfig:   []*horizonapi.PortConfig{{ContainerPort: "2181", Protocol: horizonapi.ProtocolTCP}},

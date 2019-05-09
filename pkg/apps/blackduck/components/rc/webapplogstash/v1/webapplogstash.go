@@ -63,7 +63,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 
 	webappContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "webapp", Image: containerConfigWebapp.Image,
-			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfigWebapp.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfigWebapp.MaxMem), MinCPU: fmt.Sprintf("%dm", containerConfigWebapp.MinCPU), MaxCPU: fmt.Sprintf("%dm", containerConfigWebapp.MinCPU)},
+			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfigWebapp.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfigWebapp.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfigWebapp.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfigWebapp.MinCPU)},
 		EnvConfigs:   webappEnvs,
 		VolumeMounts: webappVolumeMounts,
 		PortConfig:   []*horizonapi.PortConfig{{ContainerPort: "8443", Protocol: horizonapi.ProtocolTCP}},
@@ -93,7 +93,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 
 	logstashContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "logstash", Image: containerConfigLogstasb.Image,
-			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfigLogstasb.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfigLogstasb.MaxMem), MinCPU: fmt.Sprintf("%dm", containerConfigLogstasb.MinCPU), MaxCPU: fmt.Sprintf("%dm", containerConfigLogstasb.MinCPU)},
+			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfigLogstasb.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfigLogstasb.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfigLogstasb.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfigLogstasb.MinCPU)},
 		EnvConfigs:   []*horizonapi.EnvConfig{c.GetHubConfigEnv()},
 		VolumeMounts: logstashVolumeMounts,
 		PortConfig:   []*horizonapi.PortConfig{{ContainerPort: "5044", Protocol: horizonapi.ProtocolTCP}},

@@ -51,7 +51,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	documentationEmptyDir, _ := util.CreateEmptyDirVolumeWithoutSizeLimit("dir-documentation")
 	documentationContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "documentation", Image: containerConfig.Image,
-			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%dm", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%dm", containerConfig.MinCPU)},
+			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfig.MinCPU)},
 		EnvConfigs: []*horizonapi.EnvConfig{c.GetHubConfigEnv()},
 		VolumeMounts: []*horizonapi.VolumeMountConfig{
 			{Name: "dir-documentation", MountPath: "/opt/blackduck/hub/hub-documentation/security"},

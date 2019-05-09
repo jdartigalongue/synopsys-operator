@@ -19,8 +19,8 @@ func init() {
 			Replica: 1,
 			Containers: map[string]sizes.ContainerSize{
 				"blackduck-binaryscanner": {
-					MinCPU: 1000,
-					MaxCPU: 1000,
+					MinCPU: 1,
+					MaxCPU: 1,
 					MinMem: 2048,
 					MaxMem: 2048,
 				},
@@ -52,8 +52,8 @@ func init() {
 			Replica: 1,
 			Containers: map[string]sizes.ContainerSize{
 				"blackduck-jobrunner": {
-					MinCPU: 1000,
-					MaxCPU: 1000,
+					MinCPU: 1,
+					MaxCPU: 1,
 					MinMem: 4608,
 					MaxMem: 4608,
 				},
@@ -63,8 +63,8 @@ func init() {
 			Replica: 1,
 			Containers: map[string]sizes.ContainerSize{
 				"blackduck-postgres": {
-					MinCPU: 1000,
-					MaxCPU: 1000,
+					MinCPU: 1,
+					MaxCPU: 1,
 					MinMem: 3072,
 					MaxMem: 3072,
 				},
@@ -85,8 +85,8 @@ func init() {
 			Replica: 1,
 			Containers: map[string]sizes.ContainerSize{
 				"blackduck-registration": {
-					MinCPU: 1000,
-					MaxCPU: 1000,
+					MinCPU: 1,
+					MaxCPU: 1,
 					MinMem: 640,
 					MaxMem: 640,
 				},
@@ -96,8 +96,8 @@ func init() {
 			Replica: 1,
 			Containers: map[string]sizes.ContainerSize{
 				"blackduck-scan": {
-					MinCPU: 1000,
-					MaxCPU: 1000,
+					MinCPU: 1,
+					MaxCPU: 1,
 					MinMem: 2560,
 					MaxMem: 2560,
 				},
@@ -118,14 +118,14 @@ func init() {
 			Replica: 1,
 			Containers: map[string]sizes.ContainerSize{
 				"blackduck-webapp": {
-					MinCPU: 1000,
-					MaxCPU: 1000,
+					MinCPU: 1,
+					MaxCPU: 1,
 					MinMem: 2560,
 					MaxMem: 2560,
 				},
 				"blackduck-logstash": {
-					MinCPU: 1000,
-					MaxCPU: 1000,
+					MinCPU: 1,
+					MaxCPU: 1,
 					MinMem: 1024,
 					MaxMem: 1024,
 				},
@@ -146,8 +146,8 @@ func init() {
 			Replica: 1,
 			Containers: map[string]sizes.ContainerSize{
 				"blackduck-zookeeper": {
-					MinCPU: 1000,
-					MaxCPU: 1000,
+					MinCPU: 1,
+					MaxCPU: 1,
 					MinMem: 640,
 					MaxMem: 640,
 				},

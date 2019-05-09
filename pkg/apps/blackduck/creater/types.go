@@ -16,7 +16,7 @@ import (
 
 type Blackduck struct {
 	Rc map[string]ComponentReplicationController
-	Service map[string] func(blackduck *v1.Blackduck) services.ServiceInterface
+	Service  []func(blackduck *v1.Blackduck) services.ServiceInterface
 	Configmap func(blackduck *v1.Blackduck) configmaps.ConfigMapInterface
 	PVC func(blackduck *v1.Blackduck) pvc.PVCInterface
 	Secret func(blackduck *v1.Blackduck, config *protoform.Config, kubeClient *kubernetes.Clientset) secrets.SecretInterface
@@ -30,13 +30,6 @@ type Blackduck struct {
 type TagOrImage struct {
 	Tag string
 	Image string
-}
-
-func (t *TagOrImage) Get() string{
-	if len(t.Tag) > 0 {
-		return t.Tag
-	}
-	return t.Image
 }
 
 type ComponentReplicationController struct {
