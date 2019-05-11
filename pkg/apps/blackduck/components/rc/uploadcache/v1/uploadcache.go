@@ -27,6 +27,7 @@ import (
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
+	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 )
@@ -57,7 +58,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "uploadcache", Image: containerConfig.Image,
 			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfig.MinCPU)},
 		EnvConfigs: []*horizonapi.EnvConfig{
-			c.GetHubConfigEnv(),
+			utils2.GetHubConfigEnv(),
 			// {NameOrPrefix: "SEAL_KEY", Type: horizonapi.EnvFromSecret, KeyOrVal: "SEAL_KEY", FromName: "upload-cache"},
 		},
 		VolumeMounts: volumeMounts,

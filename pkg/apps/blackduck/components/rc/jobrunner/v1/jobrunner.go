@@ -6,6 +6,7 @@ import (
 horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 "github.com/blackducksoftware/horizon/pkg/components"
 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
+	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 
@@ -32,8 +33,8 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	jobRunnerEmptyDir, _ := util.CreateEmptyDirVolumeWithoutSizeLimit("dir-jobrunner")
 
 	jobRunnerEnvs := []*horizonapi.EnvConfig{
-		c.GetHubConfigEnv(),
-		c.GetHubDBConfigEnv(),
+		utils2.GetHubConfigEnv(),
+		utils2.GetHubDBConfigEnv(),
 	}
 
 	jobRunnerEnvs = append(jobRunnerEnvs, &horizonapi.EnvConfig{Type: horizonapi.EnvVal, NameOrPrefix: "HUB_MAX_MEMORY", KeyOrVal: fmt.Sprintf("%dM",containerConfig.MaxMem - 512)})
@@ -60,7 +61,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	}
 
 	//c.PostEditContainer(jobRunnerContainerConfig)
-	jobRunnerVolumes := []*components.Volume{c.GetDBSecretVolume(), jobRunnerEmptyDir}
+	jobRunnerVolumes := []*components.Volume{utils2.GetDBSecretVolume(), jobRunnerEmptyDir}
 
 	// Mount the HTTPS proxy certificate if provided
 	if len (c.blackduck.Spec.ProxyCertificate) > 0  {
@@ -69,7 +70,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 			MountPath: "/tmp/secrets/HUB_PROXY_CERT_FILE",
 			SubPath:   "HUB_PROXY_CERT_FILE",
 		})
-		jobRunnerVolumes = append(jobRunnerVolumes, c.GetProxyVolume())
+		jobRunnerVolumes = append(jobRunnerVolumes, utils2.GetProxyVolume())
 	}
 
 	jobRunner := util.CreateReplicationControllerFromContainer(&horizonapi.ReplicationControllerConfig{Namespace: c.Namespace, Name: "jobrunner", Replicas: util.IntToInt32(c.Replicas)}, "",

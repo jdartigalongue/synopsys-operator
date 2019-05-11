@@ -24,13 +24,11 @@ package v1
 
 import (
 	"fmt"
-	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/database/postgres"
-	"strconv"
 )
 
 
@@ -76,41 +74,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 		MaxConnections:         300,
 		SharedBufferInMB:       1024,
 		EnvConfigMapRefs:       []string{"blackduck-db-config"},
-		Labels:                 utils.GetVersionLabel("postgres", c.blackduck.Spec.Version),
+		Labels:                 utils.GetLabel("postgres"),
 	}
 	return p.GetPostgresReplicationController()
 }
-
-// GetPostgresConfigmap will return the postgres configMaps
-func (c *deploymentVersion) GetPostgresConfigmap() *components.ConfigMap {
-	// DB
-	hubDbConfig := components.NewConfigMap(horizonapi.ConfigMapConfig{Namespace: c.Namespace, Name: "blackduck-db-config"})
-	if c.blackduck.Spec.ExternalPostgres != nil {
-		hubDbConfig.AddData(map[string]string{
-			"HUB_POSTGRES_ADMIN": c.blackduck.Spec.ExternalPostgres.PostgresAdmin,
-			"HUB_POSTGRES_USER":  c.blackduck.Spec.ExternalPostgres.PostgresUser,
-			"HUB_POSTGRES_PORT":  strconv.Itoa(c.blackduck.Spec.ExternalPostgres.PostgresPort),
-			"HUB_POSTGRES_HOST":  c.blackduck.Spec.ExternalPostgres.PostgresHost,
-		})
-	} else {
-		hubDbConfig.AddData(map[string]string{
-			"HUB_POSTGRES_ADMIN": "blackduck",
-			"HUB_POSTGRES_USER":  "blackduck_user",
-			"HUB_POSTGRES_PORT":  "5432",
-			"HUB_POSTGRES_HOST":  "postgres",
-		})
-	}
-
-	if c.blackduck.Spec.ExternalPostgres != nil {
-		hubDbConfig.AddData(map[string]string{"HUB_POSTGRES_ENABLE_SSL": strconv.FormatBool(c.blackduck.Spec.ExternalPostgres.PostgresSsl)})
-		if c.blackduck.Spec.ExternalPostgres.PostgresSsl {
-			hubDbConfig.AddData(map[string]string{"HUB_POSTGRES_ENABLE_SSL_CERT_AUTH": "false"})
-		}
-	} else {
-		hubDbConfig.AddData(map[string]string{"HUB_POSTGRES_ENABLE_SSL": "false"})
-	}
-	hubDbConfig.AddLabels(utils.GetVersionLabel("postgres",c.blackduck.Spec.Version))
-
-	return hubDbConfig
-}
-

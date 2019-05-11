@@ -44,6 +44,8 @@ func (c *configmap) GetCM() []*components.ConfigMap {
 	hubConfig.AddLabels(utils.GetVersionLabel("configmap",c.blackduck.Spec.Version))
 	configMaps = append(configMaps, hubConfig)
 
+	configMaps = append(configMaps, c.getPostgresCM())
+
 	return configMaps
 }
 

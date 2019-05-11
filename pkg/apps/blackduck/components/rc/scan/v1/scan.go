@@ -27,6 +27,7 @@ import (
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
+	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 )
@@ -49,7 +50,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 		return nil
 	}
 
-	scannerEnvs := []*horizonapi.EnvConfig{c.GetHubConfigEnv(), c.GetHubDBConfigEnv()}
+	scannerEnvs := []*horizonapi.EnvConfig{utils2.GetHubConfigEnv(), utils2.GetHubDBConfigEnv()}
 	scannerEnvs = append(scannerEnvs, &horizonapi.EnvConfig{Type: horizonapi.EnvVal, NameOrPrefix: "HUB_MAX_MEMORY", KeyOrVal: fmt.Sprintf("%dM",containerConfig.MaxMem - 512)})
 	hubScanEmptyDir, _ := util.CreateEmptyDirVolumeWithoutSizeLimit("dir-scan")
 	hubScanContainerConfig := &util.Container{
@@ -93,7 +94,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 		}}
 	}
 
-	hubScanVolumes := []*components.Volume{hubScanEmptyDir, c.GetDBSecretVolume()}
+	hubScanVolumes := []*components.Volume{hubScanEmptyDir, utils2.GetDBSecretVolume()}
 
 	// Mount the HTTPS proxy certificate if provided
 	if len(c.blackduck.Spec.ProxyCertificate) > 0 {
@@ -102,7 +103,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 			MountPath: "/tmp/secrets/HUB_PROXY_CERT_FILE",
 			SubPath:   "HUB_PROXY_CERT_FILE",
 		})
-		hubScanVolumes = append(hubScanVolumes, c.GetProxyVolume())
+		hubScanVolumes = append(hubScanVolumes, utils2.GetProxyVolume())
 	}
 	//c.PostEditContainer(hubScanContainerConfig)
 

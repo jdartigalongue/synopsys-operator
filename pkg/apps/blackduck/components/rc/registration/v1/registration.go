@@ -26,6 +26,7 @@ import (
 	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
+	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
@@ -54,7 +55,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	registrationContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "registration", Image: containerConfig.Image,
 			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfig.MinCPU)},
-		EnvConfigs:   []*horizonapi.EnvConfig{c.GetHubConfigEnv()},
+		EnvConfigs:   []*horizonapi.EnvConfig{utils2.GetHubConfigEnv()},
 		VolumeMounts: c.getRegistrationVolumeMounts(),
 		PortConfig:   []*horizonapi.PortConfig{{ContainerPort: "8443", Protocol: horizonapi.ProtocolTCP}},
 	}
@@ -110,7 +111,7 @@ func (c *deploymentVersion) getRegistrationVolumes() []*components.Volume {
 
 	// Mount the HTTPS proxy certificate if provided
 	if len(c.blackduck.Spec.ProxyCertificate) > 0 {
-		volumes = append(volumes, c.GetProxyVolume())
+		volumes = append(volumes, utils2.GetProxyVolume())
 	}
 	return volumes
 }

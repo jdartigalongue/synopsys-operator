@@ -27,6 +27,7 @@ import (
 	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	"github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
+	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 
@@ -56,7 +57,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	webServerContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "webserver", Image: containerConfig.Image,
 			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM",containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU:fmt.Sprintf("%d", containerConfig.MaxCPU)},
-		EnvConfigs:   []*horizonapi.EnvConfig{c.GetHubConfigEnv()},
+		EnvConfigs:   []*horizonapi.EnvConfig{utils2.GetHubConfigEnv()},
 		VolumeMounts: c.getWebserverVolumeMounts(),
 		PortConfig:   []*horizonapi.PortConfig{{ContainerPort: "8443", Protocol: horizonapi.ProtocolTCP}},
 	}

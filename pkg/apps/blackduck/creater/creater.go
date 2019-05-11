@@ -15,13 +15,20 @@ import (
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/sizes"
 	blackduckclientset "github.com/blackducksoftware/synopsys-operator/pkg/blackduck/client/clientset/versioned"
+
+
+	routeclient "github.com/openshift/client-go/route/clientset/versioned/typed/route/v1"
+	securityclient "github.com/openshift/client-go/security/clientset/versioned/typed/security/v1"
+	log "github.com/sirupsen/logrus"
 )
 
 type Creater struct {
-	Config          *protoform.Config
-	KubeConfig      *rest.Config
-	KubeClient      *kubernetes.Clientset
-	BlackduckClient *blackduckclientset.Clientset
+	Config           *protoform.Config
+	KubeConfig       *rest.Config
+	KubeClient       *kubernetes.Clientset
+	BlackduckClient  *blackduckclientset.Clientset
+	OsSecurityClient *securityclient.SecurityV1Client
+	RouteClient      *routeclient.RouteV1Client
 }
 
 func (hc *Creater) autoRegisterHub(bdspec *blackduckapi.BlackduckSpec) error {
@@ -54,7 +61,7 @@ func (hc *Creater) autoRegisterHub(bdspec *blackduckapi.BlackduckSpec) error {
 	return fmt.Errorf("unable to register the blackduck %s", bdspec.Namespace)
 }
 
-func (hc *Creater) isBinaryAnalysisEnabled(bdspec *blackduckapi.BlackduckSpec) bool {
+func (hc *Creater) IsBinaryAnalysisEnabled(bdspec *blackduckapi.BlackduckSpec) bool {
 	for _, value := range bdspec.Environs {
 		if strings.Contains(value, "USE_BINARY_UPLOADS") {
 			values := strings.SplitN(value, ":", 2)
@@ -81,6 +88,10 @@ func (hc *Creater) GetPVCVolumeName(namespace string, name string) (string, erro
 
 func (hc *Creater) GetComponents(blackduck *blackduckapi.Blackduck, bd Blackduck) *api.ComponentList {
 	size := bd.Size.GetSize(blackduck.Spec.Size)
+	if size == nil{
+		log.Errorf("Couldn't find size: %s", blackduck.Spec.Size)
+		return nil
+	}
 
 	// Replication Controllers
 	var rcs []*components.ReplicationController
@@ -193,4 +204,36 @@ func (hc *Creater) getFullContainerNameFromImageRegistryConf(baseContainer strin
 		}
 	}
 	return ""
+}
+
+// addAnyUIDToServiceAccount adds the capability to run as 1000 for nginx or other special IDs.  For example, the binaryscanner
+// needs to run as root and we plan to add that into protoform in 2.1 / 3.0.
+func (hc *Creater) AddAnyUIDToServiceAccount(createHub *blackduckapi.BlackduckSpec) error {
+	if hc.OsSecurityClient != nil {
+		scc, err := util.GetOpenShiftSecurityConstraint(hc.OsSecurityClient, "anyuid")
+		if err != nil {
+			return fmt.Errorf("failed to get scc anyuid: %v", err)
+		}
+
+		serviceAccount := createHub.Namespace
+
+		// Only add the service account if it isn't already in the list of users for the privileged scc
+		exists := false
+		for _, user := range scc.Users {
+			if strings.Compare(user, serviceAccount) == 0 {
+				exists = true
+				break
+			}
+		}
+
+		if !exists {
+			log.Debugf("Adding anyuid securitycontextconstraint to the service account %s", createHub.Namespace)
+			scc.Users = append(scc.Users, serviceAccount)
+			_, err = hc.OsSecurityClient.SecurityContextConstraints().Update(scc)
+			if err != nil {
+				return fmt.Errorf("failed to update scc anyuid: %v", err)
+			}
+		}
+	}
+	return nil
 }

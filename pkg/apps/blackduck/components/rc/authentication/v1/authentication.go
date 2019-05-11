@@ -26,6 +26,7 @@ import (
 	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
+	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
@@ -51,8 +52,8 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 
 	volumeMounts := c.getAuthenticationVolumeMounts()
 	var authEnvs []*horizonapi.EnvConfig
-	authEnvs = append(authEnvs, c.GetHubDBConfigEnv())
-	authEnvs = append(authEnvs, c.GetHubConfigEnv())
+	authEnvs = append(authEnvs, utils2.GetHubDBConfigEnv())
+	authEnvs = append(authEnvs, utils2.GetHubConfigEnv())
 	authEnvs = append(authEnvs, &horizonapi.EnvConfig{Type: horizonapi.EnvVal, NameOrPrefix: "HUB_MAX_MEMORY", KeyOrVal: fmt.Sprintf("%dM",containerConfig.MaxMem - 512)})
 
 	hubAuthContainerConfig := &util.Container{
@@ -109,11 +110,11 @@ func (c *deploymentVersion) getAuthenticationVolumes() []*components.Volume {
 		hubAuthVolume, _ = util.CreateEmptyDirVolumeWithoutSizeLimit("dir-authentication")
 	}
 
-	volumes := []*components.Volume{hubAuthVolume, c.GetDBSecretVolume(), hubAuthSecurityEmptyDir}
+	volumes := []*components.Volume{hubAuthVolume, utils2.GetDBSecretVolume(), hubAuthSecurityEmptyDir}
 
 	// Mount the HTTPS proxy certificate if provided
 	if len(c.blackduck.Spec.ProxyCertificate) > 0 {
-		volumes = append(volumes, c.GetProxyVolume())
+		volumes = append(volumes, utils2.GetProxyVolume())
 	}
 
 	// Custom CA auth

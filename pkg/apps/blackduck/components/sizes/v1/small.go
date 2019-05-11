@@ -114,7 +114,7 @@ func init() {
 				},
 			},
 		},
-		"webapplogstash": {
+		"webapp-logstash": {
 			Replica: 1,
 			Containers: map[string]sizes.ContainerSize{
 				"blackduck-webapp": {

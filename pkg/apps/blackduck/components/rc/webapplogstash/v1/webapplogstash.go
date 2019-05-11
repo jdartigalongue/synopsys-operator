@@ -27,6 +27,7 @@ import (
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
+	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 )
@@ -56,7 +57,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 		return nil
 	}
 
-	webappEnvs := []*horizonapi.EnvConfig{c.GetHubConfigEnv(), c.GetHubDBConfigEnv()}
+	webappEnvs := []*horizonapi.EnvConfig{utils2.GetHubConfigEnv(), utils2.GetHubDBConfigEnv()}
 	webappEnvs = append(webappEnvs, &horizonapi.EnvConfig{Type: horizonapi.EnvVal, NameOrPrefix: "HUB_MAX_MEMORY", KeyOrVal: fmt.Sprintf("%dM",containerConfigWebapp.MaxMem - 512)})
 
 	webappVolumeMounts := c.getWebappVolumeMounts()
@@ -94,7 +95,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	logstashContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "logstash", Image: containerConfigLogstasb.Image,
 			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfigLogstasb.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfigLogstasb.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfigLogstasb.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfigLogstasb.MinCPU)},
-		EnvConfigs:   []*horizonapi.EnvConfig{c.GetHubConfigEnv()},
+		EnvConfigs:   []*horizonapi.EnvConfig{utils2.GetHubConfigEnv()},
 		VolumeMounts: logstashVolumeMounts,
 		PortConfig:   []*horizonapi.PortConfig{{ContainerPort: "5044", Protocol: horizonapi.ProtocolTCP}},
 	}
@@ -150,10 +151,10 @@ func (c *deploymentVersion) getWebappLogtashVolumes() []*components.Volume {
 		logstashVolume, _ = util.CreateEmptyDirVolumeWithoutSizeLimit("dir-logstash")
 	}
 
-	volumes := []*components.Volume{webappSecurityEmptyDir, webappVolume, logstashVolume, c.GetDBSecretVolume()}
+	volumes := []*components.Volume{webappSecurityEmptyDir, webappVolume, logstashVolume, utils2.GetDBSecretVolume()}
 	// Mount the HTTPS proxy certificate if provided
 	if len(c.blackduck.Spec.ProxyCertificate) > 0 {
-		volumes = append(volumes, c.GetProxyVolume())
+		volumes = append(volumes, utils2.GetProxyVolume())
 	}
 
 	return volumes
