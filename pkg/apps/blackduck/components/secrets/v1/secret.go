@@ -1,19 +1,21 @@
 package v1
 
-
 import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/secrets"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/blackduck/util"
 	"github.com/blackducksoftware/synopsys-operator/pkg/protoform"
+	util2 "github.com/blackducksoftware/synopsys-operator/pkg/util"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"k8s.io/client-go/kubernetes"
+	"strings"
 )
 
 type secret struct {
@@ -101,5 +103,44 @@ func (s *secret) getPostgresSecret() *components.Secret {
 	}
 	hubSecret.AddLabels(utils.GetVersionLabel("postgres", s.blackduck.Spec.Version))
 
+	// TODO add certificate + SEAL_KEY
+
 	return hubSecret
+}
+
+
+func (s *secret) getTLSCertKeyOrCreate() (string, string, error) {
+	if len(s.blackduck.Spec.Certificate) > 0 && len(s.blackduck.Spec.CertificateKey) > 0 {
+		return s.blackduck.Spec.Certificate, s.blackduck.Spec.CertificateKey, nil
+	}
+
+	// Cert copy
+	if len(s.blackduck.Spec.CertificateName) > 0 && !strings.EqualFold(s.blackduck.Spec.CertificateName, "default") {
+		secret, err := util2.GetSecret(s.KubeClient, s.blackduck.Spec.CertificateName, "blackduck-certificate")
+		if err == nil {
+			cert, certok := secret.Data["WEBSERVER_CUSTOM_CERT_FILE"]
+			key, keyok := secret.Data["WEBSERVER_CUSTOM_KEY_FILE"]
+			if certok && keyok {
+				return string(cert), string(key), nil
+			}
+		}
+	}
+
+	// default cert
+	secret, err := util2.GetSecret(s.KubeClient, s.Config.Namespace, "blackduck-certificate")
+	if err == nil {
+		data := secret.Data
+		if len(data) >= 2 {
+			cert, certok := secret.Data["WEBSERVER_CUSTOM_CERT_FILE"]
+			key, keyok := secret.Data["WEBSERVER_CUSTOM_KEY_FILE"]
+			if !certok || !keyok {
+				util2.DeleteSecret(s.KubeClient, s.blackduck.Spec.Namespace, "blackduck-certificate")
+			} else {
+				return string(cert), string(key), nil
+			}
+		}
+	}
+
+
+	return  "", "", errors.New("default certificate could not be found")
 }
