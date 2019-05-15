@@ -28,16 +28,21 @@ import (
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
 	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/store"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
-	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
 )
 
 type deploymentVersion struct {
-	*opc.ReplicationController
+	*types.ReplicationController
 	blackduck *v1.Blackduck
 }
 
-func NewDeploymentVersion(replicationController *opc.ReplicationController, blackduck *v1.Blackduck) opc.ReplicationControllerInterface {
+func init() {
+	store.Register(types.RcAuthenticationV1, NewDeploymentVersion)
+}
+
+func NewDeploymentVersion(replicationController *types.ReplicationController, blackduck *v1.Blackduck) types.ReplicationControllerInterface {
 	return &deploymentVersion{ReplicationController: replicationController, blackduck: blackduck}
 }
 

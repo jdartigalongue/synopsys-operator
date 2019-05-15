@@ -15,7 +15,7 @@ import (
 )
 
 type Blackduck struct {
-	Rc map[string]ComponentReplicationController
+	Rc map[string]ReplicationControllerInterface
 	Service  []func(blackduck *v1.Blackduck) services.ServiceInterface
 	Configmap func(blackduck *v1.Blackduck) configmaps.ConfigMapInterface
 	PVC func(blackduck *v1.Blackduck) pvc.PVCInterface

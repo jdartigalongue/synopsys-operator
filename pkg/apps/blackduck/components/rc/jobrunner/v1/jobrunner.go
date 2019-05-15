@@ -1,17 +1,17 @@
 package v1
 
-
 import (
-"fmt"
-horizonapi "github.com/blackducksoftware/horizon/pkg/api"
-"github.com/blackducksoftware/horizon/pkg/components"
-"github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
+	"fmt"
+	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
+	"github.com/blackducksoftware/horizon/pkg/components"
+	"github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
+	components2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components"
 	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 
-opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
-
+	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
 )
 
 type deploymentVersion struct {
@@ -19,10 +19,13 @@ type deploymentVersion struct {
 	blackduck *v1.Blackduck
 }
 
-func NewDeploymentVersion(component *opc.ReplicationController, blackduck *v1.Blackduck) opc.ReplicationControllerInterface {
-	return &deploymentVersion{ReplicationController: component, blackduck: blackduck}
+func init() {
+	components2.Register(types.RcJobrunnerV1, NewDeploymentVersion)
 }
 
+func NewDeploymentVersion(component *opc.ReplicationController, blackduck *v1.Blackduck) types.ReplicationControllerInterface {
+	return &deploymentVersion{ReplicationController: component, blackduck: blackduck}
+}
 
 func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	containerConfig, ok := c.Containers["blackduck-jobrunner"]
@@ -37,10 +40,10 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 		utils2.GetHubDBConfigEnv(),
 	}
 
-	jobRunnerEnvs = append(jobRunnerEnvs, &horizonapi.EnvConfig{Type: horizonapi.EnvVal, NameOrPrefix: "HUB_MAX_MEMORY", KeyOrVal: fmt.Sprintf("%dM",containerConfig.MaxMem - 512)})
+	jobRunnerEnvs = append(jobRunnerEnvs, &horizonapi.EnvConfig{Type: horizonapi.EnvVal, NameOrPrefix: "HUB_MAX_MEMORY", KeyOrVal: fmt.Sprintf("%dM", containerConfig.MaxMem-512)})
 	jobRunnerContainerConfig := &util.Container{
 		ContainerConfig: &horizonapi.ContainerConfig{Name: "jobrunner", Image: containerConfig.Image,
-			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM",containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU:fmt.Sprintf("%d", containerConfig.MaxCPU)},
+			PullPolicy: horizonapi.PullAlways, MinMem: fmt.Sprintf("%dM", containerConfig.MinMem), MaxMem: fmt.Sprintf("%dM", containerConfig.MaxMem), MinCPU: fmt.Sprintf("%d", containerConfig.MinCPU), MaxCPU: fmt.Sprintf("%d", containerConfig.MaxCPU)},
 		EnvConfigs: jobRunnerEnvs,
 		VolumeMounts: []*horizonapi.VolumeMountConfig{
 			{Name: "db-passwords", MountPath: "/tmp/secrets/HUB_POSTGRES_ADMIN_PASSWORD_FILE", SubPath: "HUB_POSTGRES_ADMIN_PASSWORD_FILE"},
@@ -64,7 +67,7 @@ func (c *deploymentVersion) GetRc() *components.ReplicationController {
 	jobRunnerVolumes := []*components.Volume{utils2.GetDBSecretVolume(), jobRunnerEmptyDir}
 
 	// Mount the HTTPS proxy certificate if provided
-	if len (c.blackduck.Spec.ProxyCertificate) > 0  {
+	if len(c.blackduck.Spec.ProxyCertificate) > 0 {
 		jobRunnerContainerConfig.VolumeMounts = append(jobRunnerContainerConfig.VolumeMounts, &horizonapi.VolumeMountConfig{
 			Name:      "blackduck-proxy-certificate",
 			MountPath: "/tmp/secrets/HUB_PROXY_CERT_FILE",

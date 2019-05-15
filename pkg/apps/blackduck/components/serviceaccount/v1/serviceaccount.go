@@ -1,11 +1,11 @@
 package v1
 
 import (
+	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
-	serviceaccount2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/serviceaccount"
-	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 )
 
 type serviceaccount struct {
@@ -23,6 +23,6 @@ func (s *serviceaccount) GetServiceAcccount() []*components.ServiceAccount {
 	return []*components.ServiceAccount{svc}
 }
 
-func NewServiceaccount(blackduck *v1.Blackduck) serviceaccount2.ServiceAccountInterface {
+func NewServiceaccount(blackduck *v1.Blackduck) types.ServiceAccountInterface {
 	return &serviceaccount{blackduck: blackduck}
 }

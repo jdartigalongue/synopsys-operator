@@ -1,13 +1,13 @@
 package v1
 
 import (
-	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/sizes"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 )
 
-var store = make(map[string]map[string]*sizes.Size)
+var store = make(map[string]map[string]*types.Size)
 
 
-func RegisterSize(name string, conf map[string]*sizes.Size){
+func RegisterSize(name string, conf map[string]*types.Size){
 	if _, ok := store[name]; ok{
 		return
 	}
@@ -16,11 +16,11 @@ func RegisterSize(name string, conf map[string]*sizes.Size){
 
 type v1 struct {}
 
-func NewSize() sizes.SizeInterface {
+func NewSize()types.SizeInterface {
 	return &v1{}
 }
 
-func (*v1) GetSize(name string) map[string]*sizes.Size {
+func (*v1) GetSize(name string) map[string]*types.Size {
 	val, ok := store[name]
 	if ok {
 		return val

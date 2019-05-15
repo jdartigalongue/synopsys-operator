@@ -26,8 +26,10 @@ import (
 	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
+	components2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components"
 	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
 )
@@ -37,8 +39,12 @@ type deploymentVersion struct {
 	blackduck *v1.Blackduck
 }
 
-func NewDeploymentVersion(replicationController *opc.ReplicationController, blackduck *v1.Blackduck) opc.ReplicationControllerInterface {
+func NewDeploymentVersion(replicationController *opc.ReplicationController, blackduck *v1.Blackduck) types.ReplicationControllerInterface {
 	return &deploymentVersion{ReplicationController: replicationController, blackduck: blackduck}
+}
+
+func init() {
+	components2.Register(types.RcRegistrationV1, NewDeploymentVersion)
 }
 
 // GetRegistrationDeployment will return the registration deployment

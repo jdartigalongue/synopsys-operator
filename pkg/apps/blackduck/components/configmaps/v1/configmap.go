@@ -4,8 +4,8 @@ import (
 	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
-	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/configmaps"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 	"strconv"
 	"strings"
@@ -82,7 +82,7 @@ func (c *configmap) getPostgresCM() *components.ConfigMap {
 }
 
 
-func NewConfigmap(blackduck *v1.Blackduck) configmaps.ConfigMapInterface {
+func NewConfigmap(blackduck *v1.Blackduck) types.ConfigMapInterface {
 	return &configmap{blackduck: blackduck}
 }
 

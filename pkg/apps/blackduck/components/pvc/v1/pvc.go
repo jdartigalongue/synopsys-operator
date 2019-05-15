@@ -1,13 +1,13 @@
 package v1
 
 import (
+	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
-	pvc2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/pvc"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"strings"
-	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 )
 
 type pvc struct {
@@ -94,6 +94,6 @@ func (p *pvc) createPVC(name string, requestedSize string, defaultSize string, s
 }
 
 
-func NewPvc(blackduck *v1.Blackduck) pvc2.PVCInterface {
+func NewPvc(blackduck *v1.Blackduck) types.PVCInterface {
 	return &pvc{blackduck: blackduck}
 }

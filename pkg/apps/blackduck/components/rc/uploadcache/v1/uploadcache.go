@@ -26,9 +26,11 @@ import (
 	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
+	components2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components"
 	opc "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc"
 	utils2 "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/rc/utils"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 )
 
@@ -38,10 +40,13 @@ type deploymentVersion struct {
 	blackduck *v1.Blackduck
 }
 
-func NewDeploymentVersion(replicationController *opc.ReplicationController, blackduck *v1.Blackduck) opc.ReplicationControllerInterface {
+func NewDeploymentVersion(replicationController *opc.ReplicationController, blackduck *v1.Blackduck) types.ReplicationControllerInterface {
 	return &deploymentVersion{ReplicationController: replicationController, blackduck: blackduck}
 }
 
+func init() {
+	components2.Register(types.RcUploadCacheV1, NewDeploymentVersion)
+}
 
 // GetUploadCacheDeployment will return the uploadCache deployment
 func (c *deploymentVersion) GetRc() *components.ReplicationController {

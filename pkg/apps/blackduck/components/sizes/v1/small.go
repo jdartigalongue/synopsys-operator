@@ -1,12 +1,14 @@
 package v1
 
-import "github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/sizes"
+import (
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
+)
 
 func init() {
-	RegisterSize("small", map[string]*sizes.Size{
+	RegisterSize("small", map[string]*types.Size{
 		"authentication": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-authentication": {
 					MinCPU: 0,
 					MaxCPU: 0,
@@ -17,7 +19,7 @@ func init() {
 		},
 		"binaryscanner": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-binaryscanner": {
 					MinCPU: 1,
 					MaxCPU: 1,
@@ -28,7 +30,7 @@ func init() {
 		},
 		"cfssl": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-cfssl": {
 					MinCPU: 0,
 					MaxCPU: 0,
@@ -39,7 +41,7 @@ func init() {
 		},
 		"documentation": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-documentation": {
 					MinCPU: 0,
 					MaxCPU: 0,
@@ -50,7 +52,7 @@ func init() {
 		},
 		"jobrunner": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-jobrunner": {
 					MinCPU: 1,
 					MaxCPU: 1,
@@ -61,7 +63,7 @@ func init() {
 		},
 		"postgres": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-postgres": {
 					MinCPU: 1,
 					MaxCPU: 1,
@@ -72,7 +74,7 @@ func init() {
 		},
 		"rabbitmq": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-rabbitmq": {
 					MinCPU: 0,
 					MaxCPU: 0,
@@ -83,7 +85,7 @@ func init() {
 		},
 		"registration": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-registration": {
 					MinCPU: 1,
 					MaxCPU: 1,
@@ -94,7 +96,7 @@ func init() {
 		},
 		"scan": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-scan": {
 					MinCPU: 1,
 					MaxCPU: 1,
@@ -105,7 +107,7 @@ func init() {
 		},
 		"uploadcache": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-uploadcache": {
 					MinCPU: 0,
 					MaxCPU: 0,
@@ -116,7 +118,7 @@ func init() {
 		},
 		"webapp-logstash": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-webapp": {
 					MinCPU: 1,
 					MaxCPU: 1,
@@ -133,7 +135,7 @@ func init() {
 		},
 		"webserver": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-nginx": {
 					MinCPU: 0,
 					MaxCPU: 0,
@@ -144,7 +146,7 @@ func init() {
 		},
 		"zookeeper": {
 			Replica: 1,
-			Containers: map[string]sizes.ContainerSize{
+			Containers: map[string]types.ContainerSize{
 				"blackduck-zookeeper": {
 					MinCPU: 1,
 					MaxCPU: 1,

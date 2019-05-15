@@ -7,8 +7,8 @@ import (
 	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
 	v1 "github.com/blackducksoftware/synopsys-operator/pkg/api/blackduck/v1"
-	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/secrets"
 	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/components/utils"
+	"github.com/blackducksoftware/synopsys-operator/pkg/apps/blackduck/types"
 	"github.com/blackducksoftware/synopsys-operator/pkg/blackduck/util"
 	"github.com/blackducksoftware/synopsys-operator/pkg/protoform"
 	util2 "github.com/blackducksoftware/synopsys-operator/pkg/util"
@@ -24,7 +24,7 @@ type secret struct {
 	KubeClient      *kubernetes.Clientset
 }
 
-func NewSecret(blackduck *v1.Blackduck, config *protoform.Config, kubeClient *kubernetes.Clientset) secrets.SecretInterface {
+func NewSecret(blackduck *v1.Blackduck, config *protoform.Config, kubeClient *kubernetes.Clientset) types.SecretInterface {
 	return &secret{blackduck: blackduck, Config: config, KubeClient: kubeClient}
 }
 
