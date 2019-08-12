@@ -29,7 +29,6 @@ import (
 
 	horizonapi "github.com/blackducksoftware/horizon/pkg/api"
 	"github.com/blackducksoftware/horizon/pkg/components"
-	soperator "github.com/blackducksoftware/synopsys-operator/pkg/soperator"
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -54,55 +53,32 @@ var migrateCmd = &cobra.Command{
 			cmd.Help()
 			return fmt.Errorf("this command takes 1 argument")
 		}
-		// validate Synopsys Operator image
-		if _, err := util.ValidateImageString(synopsysOperatorImage); err != nil {
-			return err
-		}
-		// validate busy box image
-		if _, err := util.ValidateImageString(busyBoxImage); err != nil {
-			return err
-		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Check if a namespace was provided, else determine the namespace from the cluster
-		namespaceToMigrate := ""
-		if len(namespace) > 0 {
-			namespaceToMigrate = namespace
-		} else {
-			isClusterScoped := util.GetClusterScope(apiExtensionClient)
-			if isClusterScoped {
-				namespaces, err := util.GetOperatorNamespace(kubeClient, metav1.NamespaceAll)
-				if err != nil {
-					return err
-				}
-				if len(namespaces) > 1 {
-					return fmt.Errorf("more than 1 Synopsys Operator found in your cluster. please pass the namespace of the Synopsys Operator that you want to migrate")
-				}
-				namespaceToMigrate = namespaces[0]
-			} else {
-				return fmt.Errorf("namespace of Synopsys Operator must be provided in namespace scoped mode")
-			}
-		}
-		// Migrate the CRDs
-		err := migrate(namespaceToMigrate)
-		if err != nil {
+		if _, err := util.ValidateImageString(busyBoxImage); err != nil {
 			return err
 		}
 
-		// Update the Operator Image
-		currOperatorSpec, err := soperator.GetOldOperatorSpec(restconfig, kubeClient, namespaceToMigrate) // Get current Synopsys Operator Spec
-		if err != nil {
-			return err
+		if len(namespace) > 0 {
+			return migrate(namespace)
 		}
-		newOperatorSpec := *currOperatorSpec          // Make copy
-		newOperatorSpec.Image = synopsysOperatorImage // Set new image
-		sOperatorCreater := soperator.NewCreater(false, restconfig, kubeClient)
-		err = sOperatorCreater.EnsureSynopsysOperator(namespaceToMigrate, blackDuckClient, opsSightClient, alertClient, currOperatorSpec, &newOperatorSpec) // this will scale up the deployment
-		if err != nil {
-			return fmt.Errorf("unable to update Synopsys Operator due to %+v", err)
+
+		// get operator namespace
+		isClusterScoped := util.GetClusterScope(apiExtensionClient)
+		if isClusterScoped {
+			namespaces, err := util.GetOperatorNamespace(kubeClient, metav1.NamespaceAll)
+			if err != nil {
+				return err
+			}
+
+			if len(namespaces) > 1 {
+				return fmt.Errorf("more than 1 Synopsys Operator found in your cluster. please pass the namespace of the Synopsys Operator that you want to migrate")
+			}
+			return migrate(namespaces[0])
 		}
-		return nil
+
+		return fmt.Errorf("namespace of the Synopsys Operator need to be provided")
 	},
 }
 
@@ -289,7 +265,7 @@ func migrateCR(namespace string, crdName string) error {
 
 // migrateAlert migrates the existing Alert instances
 func migrateAlert(namespace string) error {
-	alerts, err := util.ListAlerts(alertClient, namespace)
+	alerts, err := util.ListAlerts(alertClient, namespace, metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list Alert instances in namespace '%s' due to %+v", namespace, err)
 	}
@@ -329,7 +305,7 @@ func migrateAlert(namespace string) error {
 
 // migrateBlackDuck migrates the existing Black Duck instances
 func migrateBlackDuck(namespace string) error {
-	blackDucks, err := util.ListHubs(blackDuckClient, namespace)
+	blackDucks, err := util.ListBlackduck(blackDuckClient, namespace, metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list Black Duck instances in namespace '%s' due to %+v", namespace, err)
 	}
@@ -522,7 +498,7 @@ func migrateUploadCachePVCJob(namespace string, name string, uploadCacheKeyVolum
 
 // migrateOpsSight migrates the existing OpsSight instances
 func migrateOpsSight(namespace string) error {
-	opsSights, err := util.ListOpsSights(opsSightClient, namespace)
+	opsSights, err := util.ListOpsSights(opsSightClient, namespace, metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list OpsSight instances in namespace '%s' due to %+v", namespace, err)
 	}
@@ -772,22 +748,20 @@ func addNameLabels(namespace string, name string, appName string) error {
 		}
 	}
 
-	if util.IsOpenshift(kubeClient) {
-		routeClient := util.GetRouteClient(restconfig, kubeClient, namespace)
-		if routeClient != nil {
-			routes, err := util.ListRoutes(routeClient, namespace, fmt.Sprintf("app=%s", appName))
-			if err != nil {
-				return fmt.Errorf("unable to list routes for %s %s in namespace %s due to %+v", appName, name, namespace, err)
-			}
+	routeClient := util.GetRouteClient(restconfig, kubeClient, namespace)
+	if routeClient != nil {
+		routes, err := util.ListRoutes(routeClient, namespace, fmt.Sprintf("app=%s", appName))
+		if err != nil {
+			return fmt.Errorf("unable to list routes for %s %s in namespace %s due to %+v", appName, name, namespace, err)
+		}
 
-			for _, route := range routes.Items {
-				if _, ok := route.Labels["name"]; !ok || appName == util.OpsSightName {
-					route.Labels = util.InitLabels(route.Labels)
-					route.Labels["name"] = name
-					_, err = util.UpdateRoute(routeClient, namespace, &route)
-					if err != nil {
-						return fmt.Errorf("unable to update %s route in namespace %s due to %+v", route.GetName(), namespace, err)
-					}
+		for _, route := range routes.Items {
+			if _, ok := route.Labels["name"]; !ok || appName == util.OpsSightName {
+				route.Labels = util.InitLabels(route.Labels)
+				route.Labels["name"] = name
+				_, err = util.UpdateRoute(routeClient, namespace, &route)
+				if err != nil {
+					return fmt.Errorf("unable to update %s route in namespace %s due to %+v", route.GetName(), namespace, err)
 				}
 			}
 		}
@@ -835,7 +809,7 @@ var migrateCleanupCmd = &cobra.Command{
 
 // cleanup will cleanup the resources
 func cleanup(namespace string) error {
-	blackDucks, err := util.ListHubs(blackDuckClient, namespace)
+	blackDucks, err := util.ListBlackduck(blackDuckClient, namespace, metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list Black Duck instances in namespace '%s' due to %+v", namespace, err)
 	}
@@ -880,8 +854,7 @@ func init() {
 	// Add Migrate Commands
 	rootCmd.AddCommand(migrateCmd)
 	migrateCmd.Flags().StringVarP(&namespace, "namespace", "n", namespace, "Namespace of the instance(s)")
-	migrateCmd.Flags().StringVarP(&busyBoxImage, "busybox-image", "b", busyBoxImage, "Image URL of Busybox")
-	migrateCmd.Flags().StringVarP(&synopsysOperatorImage, "update-image", "i", synopsysOperatorImage, "Image to migrate the Synopsys Operator instance to")
+	migrateCmd.Flags().StringVarP(&busyBoxImage, "busybox-image", "i", busyBoxImage, "Image URL of Busybox")
 	// Add Migrate Cleanup command to Migrate command
 	migrateCmd.AddCommand(migrateCleanupCmd)
 	migrateCleanupCmd.Flags().StringVarP(&namespace, "namespace", "n", namespace, "Namespace of the instance(s)")

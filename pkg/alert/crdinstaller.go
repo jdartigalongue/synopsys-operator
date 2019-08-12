@@ -57,7 +57,7 @@ type CRDInstaller struct {
 // NewCRDInstaller will create a installer configuration
 func NewCRDInstaller(config *protoform.Config, kubeConfig *rest.Config, kubeClient *kubernetes.Clientset, defaults interface{}, stopCh <-chan struct{}) *CRDInstaller {
 	crdInstaller := &CRDInstaller{config: config, kubeConfig: kubeConfig, kubeClient: kubeClient, defaults: defaults, threadiness: config.Threadiness, stopCh: stopCh}
-	crdInstaller.resyncPeriod = time.Duration(config.ResyncIntervalInSeconds) * time.Second
+	crdInstaller.resyncPeriod = 0
 	crdInstaller.indexers = cache.Indexers{}
 	return crdInstaller
 }
@@ -85,7 +85,7 @@ func (c *CRDInstaller) PostDeploy() {
 func (c *CRDInstaller) CreateInformer() {
 	c.infomer = alertinformerv1.NewAlertInformer(
 		c.alertClient,
-		c.config.Namespace,
+		c.config.CrdNamespace,
 		c.resyncPeriod,
 		c.indexers,
 	)
@@ -137,15 +137,15 @@ func (c *CRDInstaller) AddInformerEventHandler() {
 
 // CreateHandler will create a CRD handler
 func (c *CRDInstaller) CreateHandler() {
+	routeClient := util.GetRouteClient(c.kubeConfig, c.kubeClient, c.config.Namespace)
+
 	c.handler = &Handler{
 		config:      c.config,
 		kubeConfig:  c.kubeConfig,
 		kubeClient:  c.kubeClient,
 		alertClient: c.alertClient,
 		defaults:    c.defaults.(*alertapi.AlertSpec),
-	}
-	if util.IsOpenshift(c.kubeClient) {
-		c.handler.routeClient = util.GetRouteClient(c.kubeConfig, c.kubeClient, c.config.Namespace)
+		routeClient: routeClient,
 	}
 }
 

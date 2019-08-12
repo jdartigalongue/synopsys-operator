@@ -209,9 +209,9 @@ func checkUpdateCustomResource(crdType string, namespace string, scope apiextens
 // getSpecToDeploySOperator returns the config from creating Synopsys Operator
 func getSpecToDeploySOperator(crds []string) (*soperator.SpecConfig, error) {
 	// verify Synopsys Operator image has a tag
-	// validate Synopsys Operator image
-	if _, err := util.ValidateImageString(synopsysOperatorImage); err != nil {
-		return nil, err
+	imageHasTag := len(strings.Split(synopsysOperatorImage, ":")) == 2
+	if !imageHasTag {
+		return nil, fmt.Errorf("Synopsys Operator image doesn't have a tag: %s", synopsysOperatorImage)
 	}
 	// generate random string as SEAL key
 	log.Debugf("getting Seal Key")
@@ -228,7 +228,7 @@ func getSpecToDeploySOperator(crds []string) (*soperator.SpecConfig, error) {
 	}
 	// Deploy Synopsys Operator
 	log.Debugf("creating Synopsys Operator's components")
-	soperatorSpec := soperator.NewSOperator(operatorNamespace, synopsysOperatorImage, exposeUI, soperator.GetClusterType(kubeClient),
+	soperatorSpec := soperator.NewSOperator(operatorNamespace, synopsysOperatorImage, exposeUI, soperator.GetClusterType(restconfig, kubeClient, operatorNamespace),
 		strings.ToUpper(dryRun) == "TRUE", logLevel, threadiness, postgresRestartInMins, podWaitTimeoutSeconds, resyncIntervalInSeconds,
 		terminationGracePeriodSeconds, sealKey, restconfig, kubeClient, cert, key, isClusterScoped, crds, admissionWebhookListener)
 	return soperatorSpec, nil

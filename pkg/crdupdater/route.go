@@ -42,11 +42,10 @@ type Route struct {
 
 // NewRoute returns the route configuration
 func NewRoute(config *CommonConfig, routes []*api.Route) (*Route, error) {
-	if !util.IsOpenshift(config.kubeClient) {
+	routeClient := util.GetRouteClient(config.kubeConfig, config.kubeClient, config.namespace)
+	if routeClient == nil { // skip if running Kubernetes
 		return nil, nil
 	}
-	routeClient := util.GetRouteClient(config.kubeConfig, config.kubeClient, config.namespace)
-
 	deployer, err := util.NewDeployer(config.kubeConfig)
 	if err != nil {
 		return nil, errors.Annotatef(err, "unable to get deployer object for %s", config.namespace)

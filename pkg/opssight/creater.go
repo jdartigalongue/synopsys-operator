@@ -134,7 +134,7 @@ func (ac *Creater) CreateOpsSight(opssight *opssightapi.OpsSight) error {
 
 	if !ac.config.DryRun {
 		// call the CRUD updater to create or update opssight
-		commonConfig := crdupdater.NewCRUDComponents(ac.kubeConfig, ac.kubeClient, ac.config.DryRun, false, opssightSpec.Namespace, "2.2.4",
+		commonConfig := crdupdater.NewCRUDComponents(ac.kubeConfig, ac.kubeClient, ac.config.DryRun, false, opssightSpec.Namespace, "2.2.3",
 			components, fmt.Sprintf("app=%s,name=%s", util.OpsSightName, opssight.Name), true)
 		_, errs := commonConfig.CRUDComponents()
 
@@ -274,7 +274,8 @@ func (ac *Creater) deployHub(createOpsSight *opssightapi.OpsSightSpec) error {
 		hubSpec.Namespace = name
 		createHub := &blackduckapi.Blackduck{ObjectMeta: metav1.ObjectMeta{Name: name}, Spec: *hubSpec}
 		log.Debugf("hub[%d]: %+v", i, createHub)
-		_, err = util.CreateHub(ac.hubClient, name, createHub)
+
+		_, err = util.CreateBlackduck(ac.hubClient, name, createHub)
 		if err != nil {
 			log.Errorf("hub[%d]: unable to create the hub due to %+v", i, err)
 			hubErrs[name] = fmt.Errorf("unable to create the hub due to %+v", err)

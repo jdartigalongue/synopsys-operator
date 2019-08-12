@@ -65,7 +65,15 @@ func runProtoform(configPath string, version string) {
 		log.Infof("Kubernetes: %s", kversion)
 	}
 
-	deployer.Config.IsOpenshift = util.IsOpenshift(deployer.KubeClientSet)
+	// Log Openshift version
+	oversion, err := util.GetOcVersion(deployer.KubeClientSet)
+	if err == nil {
+		log.Infof("Openshift: %s", oversion)
+	}
+
+	if len(oversion) > 0 {
+		deployer.Config.IsOpenshift = true
+	}
 
 	stopCh := make(chan struct{})
 

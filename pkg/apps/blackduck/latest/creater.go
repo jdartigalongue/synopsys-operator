@@ -25,6 +25,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"reflect"
 	"strings"
@@ -195,7 +196,7 @@ func (hc *Creater) Ensure(blackduck *blackduckapi.Blackduck) error {
 	}
 
 	if !reflect.DeepEqual(blackduck.Status, newBlackuck.Status) {
-		bd, err := util.GetHub(hc.blackduckClient, blackduck.Spec.Namespace, blackduck.Name)
+		bd, err := util.GetBlackduck(hc.blackduckClient, hc.config.CrdNamespace, blackduck.Name, v1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -360,7 +361,7 @@ func (hc *Creater) autoRegisterHub(name string, bdspec *blackduckapi.BlackduckSp
 			}
 
 			// Create the exec into Kubernetes pod request
-			req := util.CreateExecContainerRequest(hc.kubeClient, registrationPod, "/bin/sh")
+			req := util.CreateExecContainerRequest(hc.kubeClient, registrationPod, "/bin/bash")
 			// Exec into the Kubernetes pod and execute the commands
 			_, err = util.ExecContainer(hc.kubeConfig, req, []string{fmt.Sprintf(`curl -k -X POST "https://127.0.0.1:8443/registration/HubRegistration?registrationid=%s&action=activate" -k --cert /opt/blackduck/hub/hub-registration/security/blackduck_system.crt --key /opt/blackduck/hub/hub-registration/security/blackduck_system.key`, registrationKey)})
 

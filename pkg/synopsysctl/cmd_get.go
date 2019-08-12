@@ -25,6 +25,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"path/filepath"
 
 	"github.com/blackducksoftware/synopsys-operator/pkg/util"
@@ -131,7 +132,7 @@ var getBlackDuckRootKeyCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		blackDuckName, blackDuckNamespace, crdScope, err := getInstanceInfo(false, util.BlackDuckCRDName, util.BlackDuckName, namespace, args[0])
+		blackDuckName, blackDuckNamespace, crdNamespace, crdScope, err := getInstanceInfo(false, util.BlackDuckCRDName, util.BlackDuckName, namespace, args[0])
 		if err != nil {
 			return err
 		}
@@ -142,11 +143,11 @@ var getBlackDuckRootKeyCmd = &cobra.Command{
 		}
 
 		filePath := args[1]
-		log.Infof("getting Black Duck '%s' in namespace '%s'...", blackDuckName, blackDuckNamespace)
+		log.Infof("getting Black Duck '%s' in namespace '%s'...", blackDuckName, crdNamespace)
 
-		_, err = util.GetHub(blackDuckClient, blackDuckNamespace, blackDuckName)
+		_, err = util.GetBlackduck(blackDuckClient, crdNamespace, blackDuckName, v1.GetOptions{})
 		if err != nil {
-			return fmt.Errorf("error getting Black Duck '%s' in namespace '%s' due to %+v", blackDuckName, blackDuckNamespace, err)
+			return fmt.Errorf("error getting Black Duck '%s' in namespace '%s' due to %+v", blackDuckName, crdNamespace, err)
 		}
 
 		// getting the operator secret to retrieve the seal key

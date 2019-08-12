@@ -22,7 +22,6 @@ under the License.
 package actions
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -337,15 +336,6 @@ func (v BlackducksResource) postSubmit(c buffalo.Context, blackduck *blackduckap
 	if err := c.Bind(blackduck); err != nil {
 		log.Errorf("error binding Black Duck '%+v' due to %+v", c, err)
 		return errors.WithStack(err)
-	}
-
-	if len(blackduck.View.NodeAffinities) > 0 {
-		nodeAffinities := map[string][]blackduckapi.NodeAffinity{}
-		err := json.Unmarshal([]byte(blackduck.View.NodeAffinities), &nodeAffinities)
-		if err != nil {
-			return err
-		}
-		blackduck.Spec.NodeAffinities = nodeAffinities
 	}
 
 	if !blackduck.Spec.PersistentStorage {

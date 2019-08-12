@@ -148,7 +148,7 @@ func (in *OpsSight) DeepCopyObject() runtime.Object {
 func (in *OpsSightList) DeepCopyInto(out *OpsSightList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	out.ListMeta = in.ListMeta
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]OpsSight, len(*in))

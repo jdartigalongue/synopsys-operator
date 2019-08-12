@@ -30,11 +30,13 @@ import (
 	blackduckclientset "github.com/blackducksoftware/synopsys-operator/pkg/blackduck/client/clientset/versioned"
 	opssightclientset "github.com/blackducksoftware/synopsys-operator/pkg/opssight/client/clientset/versioned"
 	"github.com/blackducksoftware/synopsys-operator/pkg/protoform"
-	"github.com/blackducksoftware/synopsys-operator/pkg/util"
+	operatorutil "github.com/blackducksoftware/synopsys-operator/pkg/util"
+	util "github.com/blackducksoftware/synopsys-operator/pkg/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -131,7 +133,8 @@ func DetermineClusterClients(restConfig *rest.Config, kubeClient *kubernetes.Cli
 
 	// Add Openshift rules
 	openshiftTest := false
-	if util.IsOpenshift(kubeClient) {
+	routeClient := operatorutil.GetRouteClient(restConfig, kubeClient, metav1.NamespaceAll) // kube doesn't have a route client but openshift does
+	if routeClient != nil {
 		openshiftTest = true
 	}
 
@@ -225,38 +228,39 @@ func RunKubeEditorCmd(restConfig *rest.Config, kubeClient *kubernetes.Clientset,
 }
 
 // getInstanceInfo provides the name, namespace and crd scope of the request custom resource instance
-func getInstanceInfo(mock bool, crdName string, appName string, namespace string, name string) (string, string, apiextensions.ResourceScope, error) {
+func getInstanceInfo(mock bool, crdName string, appName string, namespace string, name string) (string, string, string, apiextensions.ResourceScope, error) {
 	crdScope := apiextensions.ClusterScoped
 	if !mock {
 		crd, err := util.GetCustomResourceDefinition(apiExtensionClient, crdName)
 		if err != nil {
-			return "", "", "", fmt.Errorf("unable to get Custom Resource Definition '%s' in your cluster due to %+v", crdName, err)
+			return "", "", "", "", fmt.Errorf("unable to get Custom Resource Definition '%s' in your cluster due to %+v", crdName, err)
 		}
 		crdScope = crd.Spec.Scope
 	}
 
 	// if the CRD scope is namespaced scope, then the user need to provide the namespace
 	if crdScope != apiextensions.ClusterScoped && len(namespace) == 0 {
-		return "", "", "", fmt.Errorf("namespace needs to be provided. please use the 'namespace' option to set it")
+		return "", "", "", "", fmt.Errorf("namespace needs to be provided. please use the 'namespace' option to set it")
 	}
-
+	crdNamespace := namespace
 	if crdScope == apiextensions.ClusterScoped {
+		crdNamespace = ""
 		if len(namespace) == 0 {
 			namespace = name
 			// update scenrio to find out the namespace in case of cluster scope
 			if len(appName) > 0 {
 				ns, err := util.ListNamespaces(kubeClient, fmt.Sprintf("synopsys.com/%s.%s", appName, name))
 				if err != nil {
-					return "", "", "", fmt.Errorf("unable to list the '%s' instance '%s' in namespace '%s' due to %+v", appName, name, namespace, err)
+					return "", "", "", "", fmt.Errorf("unable to list the '%s' instance '%s' in namespace '%s' due to %+v", appName, name, namespace, err)
 				}
 				if len(ns.Items) > 0 {
 					namespace = ns.Items[0].Name
 				} else {
-					return "", "", "", fmt.Errorf("unable to find the namespace of the '%s' instance '%s'", appName, name)
+					return "", "", "", "", fmt.Errorf("unable to find the namespace of the '%s' instance '%s'", appName, name)
 				}
 			}
 		}
 	}
 
-	return name, namespace, crdScope, nil
+	return name, namespace, crdNamespace, crdScope, nil
 }

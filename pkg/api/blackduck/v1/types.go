@@ -47,7 +47,6 @@ type BlackduckView struct {
 	ContainerTags     []string          `json:"containerTags"`
 	Version           string            `json:"version"`
 	SupportedVersions []string          `json:"supportedVersions"`
-	NodeAffinities    string            `json:"nodeAffinities"`
 }
 
 // BlackduckSpec will be CRD Blackduck definition's Spec

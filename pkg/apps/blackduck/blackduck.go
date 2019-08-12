@@ -71,10 +71,7 @@ func NewBlackduck(config *protoform.Config, kubeConfig *rest.Config) *Blackduck 
 		return nil
 	}
 
-	var routeClient *routeclient.RouteV1Client
-	if util.IsOpenshift(kubeclient) {
-		routeClient = util.GetRouteClient(kubeConfig, kubeclient, config.Namespace)
-	}
+	routeClient := util.GetRouteClient(kubeConfig, kubeclient, config.Namespace)
 
 	creaters := []Creater{
 		v1blackduck.NewCreater(config, kubeConfig, kubeclient, blackduckClient, routeClient),

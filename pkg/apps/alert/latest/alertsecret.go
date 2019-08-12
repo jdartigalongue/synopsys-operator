@@ -47,16 +47,10 @@ func (a *SpecConfig) getAlertSecret() (*components.Secret, error) {
 		Namespace: a.alert.Spec.Namespace,
 		Type:      horizonapi.SecretTypeOpaque,
 	})
-
-	alertSecretData := make(map[string][]byte, 0)
-	if len(a.alert.Spec.EncryptionPassword) > 0 {
-		alertSecretData["ALERT_ENCRYPTION_PASSWORD"] = []byte(a.alert.Spec.EncryptionPassword)
-	}
-
-	if len(a.alert.Spec.EncryptionGlobalSalt) > 0 {
-		alertSecretData["ALERT_ENCRYPTION_GLOBAL_SALT"] = []byte(a.alert.Spec.EncryptionGlobalSalt)
-	}
-	alertSecret.AddData(alertSecretData)
+	alertSecret.AddData(map[string][]byte{
+		"ALERT_ENCRYPTION_PASSWORD":    []byte(a.alert.Spec.EncryptionPassword),
+		"ALERT_ENCRYPTION_GLOBAL_SALT": []byte(a.alert.Spec.EncryptionGlobalSalt),
+	})
 
 	alertSecret.AddLabels(map[string]string{"app": util.AlertName, "name": a.alert.Name, "component": "alert"})
 	return alertSecret, nil

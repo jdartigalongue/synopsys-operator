@@ -26,6 +26,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/blackducksoftware/synopsys-operator/pkg/blackduck/client/clientset/versioned/scheme"
 	"io"
 	"io/ioutil"
 	"reflect"
@@ -57,7 +58,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
-	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -712,35 +713,66 @@ func DeletePVC(clientset *kubernetes.Clientset, namespace string, name string) e
 	return clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
-// CreateHub will create hub in the cluster
-func CreateHub(hubClientset *hubclientset.Clientset, namespace string, createHub *blackduckapi.Blackduck) (*blackduckapi.Blackduck, error) {
-	return hubClientset.SynopsysV1().Blackducks(namespace).Create(createHub)
+// CreateBlackduck will create hub in the cluster
+func CreateBlackduck(blackduckClientset *hubclientset.Clientset, namespace string, createHub *blackduckapi.Blackduck) (*blackduckapi.Blackduck, error) {
+	result := &blackduckapi.Blackduck{}
+	req := blackduckClientset.SynopsysV1().RESTClient().Post().Resource("blackducks").Body(createHub)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
-// ListHubs will list all hubs in the cluster
-func ListHubs(hubClientset *hubclientset.Clientset, namespace string) (*blackduckapi.BlackduckList, error) {
-	return hubClientset.SynopsysV1().Blackducks(namespace).List(metav1.ListOptions{})
+// GetBlackduck will get hubs in the cluster
+func GetBlackduck(blackduckClientset *hubclientset.Clientset, namespace string, name string, options metav1.GetOptions) (*blackduckapi.Blackduck, error) {
+	result := &blackduckapi.Blackduck{}
+	req := blackduckClientset.SynopsysV1().RESTClient().Get().Resource("blackducks").Name(name).VersionedParams(&options, scheme.ParameterCodec)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
-// GetHub will get hubs in the cluster
-func GetHub(hubClientset *hubclientset.Clientset, namespace string, name string) (*blackduckapi.Blackduck, error) {
-	return hubClientset.SynopsysV1().Blackducks(namespace).Get(name, metav1.GetOptions{})
-}
+// ListBlackduck gets all blackducks
+func ListBlackduck(blackduckClientset *hubclientset.Clientset, namespace string, opts metav1.ListOptions) (*blackduckapi.BlackduckList, error) {
+	result := &blackduckapi.BlackduckList{}
+	var timeout time.Duration
+	if opts.TimeoutSeconds != nil {
+		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
+	}
+	req := blackduckClientset.SynopsysV1().RESTClient().Get().Resource("blackducks").VersionedParams(&opts, scheme.ParameterCodec).Timeout(timeout)
 
-// GetBlackducks gets all blackducks
-func GetBlackducks(clientSet *hubclientset.Clientset) (*blackduckapi.BlackduckList, error) {
-	return clientSet.SynopsysV1().Blackducks(metav1.NamespaceAll).List(metav1.ListOptions{})
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // UpdateBlackduck will update Blackduck in the cluster
-func UpdateBlackduck(blackduckClientset *hubclientset.Clientset, namespace string, blackduck *blackduckapi.Blackduck) (*blackduckapi.Blackduck, error) {
-	return blackduckClientset.SynopsysV1().Blackducks(namespace).Update(blackduck)
+func UpdateBlackduck(blackduckClientset *hubclientset.Clientset, blackduck *blackduckapi.Blackduck) (*blackduckapi.Blackduck, error) {
+	result := &blackduckapi.Blackduck{}
+	req := blackduckClientset.SynopsysV1().RESTClient().Put().Resource("blackducks").Body(blackduck).Name(blackduck.Name)
+
+	if len(blackduck.Namespace) > 0 {
+		req = req.Namespace(blackduck.Namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // UpdateBlackducks will update a set of Blackducks in the cluster
 func UpdateBlackducks(clientSet *hubclientset.Clientset, blackduckCRDs []blackduckapi.Blackduck) error {
 	for _, crd := range blackduckCRDs {
-		_, err := UpdateBlackduck(clientSet, crd.Spec.Namespace, &crd)
+		_, err := UpdateBlackduck(clientSet, &crd)
 		if err != nil {
 			return err
 		}
@@ -748,24 +780,57 @@ func UpdateBlackducks(clientSet *hubclientset.Clientset, blackduckCRDs []blackdu
 	return nil
 }
 
-// WatchHubs will watch for hub events in the cluster
-func WatchHubs(hubClientset *hubclientset.Clientset, namespace string) (watch.Interface, error) {
-	return hubClientset.SynopsysV1().Blackducks(namespace).Watch(metav1.ListOptions{})
+// DeleteBlackduck will delete Blackduck in the cluster
+func DeleteBlackduck(blackduckClientset *hubclientset.Clientset, name string, namespace string, options *metav1.DeleteOptions) error {
+	req := blackduckClientset.SynopsysV1().RESTClient().Delete().Resource("blackducks").Name(name).Body(options)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+	return req.Do().Error()
 }
 
 // CreateOpsSight will create opsSight in the cluster
 func CreateOpsSight(opssightClientset *opssightclientset.Clientset, namespace string, opssight *opssightapi.OpsSight) (*opssightapi.OpsSight, error) {
-	return opssightClientset.SynopsysV1().OpsSights(namespace).Create(opssight)
+	result := &opssightapi.OpsSight{}
+	req := opssightClientset.SynopsysV1().RESTClient().Post().Resource("opssights").Body(opssight)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // ListOpsSights will list all opssights in the cluster
-func ListOpsSights(opssightClientset *opssightclientset.Clientset, namespace string) (*opssightapi.OpsSightList, error) {
-	return opssightClientset.SynopsysV1().OpsSights(namespace).List(metav1.ListOptions{})
+func ListOpsSights(opssightClientset *opssightclientset.Clientset, namespace string, opts metav1.ListOptions) (*opssightapi.OpsSightList, error) {
+	result := &opssightapi.OpsSightList{}
+	var timeout time.Duration
+	if opts.TimeoutSeconds != nil {
+		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
+	}
+	req := opssightClientset.SynopsysV1().RESTClient().Get().Resource("opssights").VersionedParams(&opts, scheme.ParameterCodec).Timeout(timeout)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // GetOpsSight will get OpsSight in the cluster
-func GetOpsSight(opssightClientset *opssightclientset.Clientset, namespace string, name string) (*opssightapi.OpsSight, error) {
-	return opssightClientset.SynopsysV1().OpsSights(namespace).Get(name, metav1.GetOptions{})
+func GetOpsSight(opssightClientset *opssightclientset.Clientset, namespace string, name string, options metav1.GetOptions) (*opssightapi.OpsSight, error) {
+	result := &opssightapi.OpsSight{}
+	req := opssightClientset.SynopsysV1().RESTClient().Get().Resource("opssights").Name(name).VersionedParams(&options, scheme.ParameterCodec)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // GetOpsSights gets all opssights
@@ -775,7 +840,15 @@ func GetOpsSights(clientSet *opssightclientset.Clientset) (*opssightapi.OpsSight
 
 // UpdateOpsSight will update OpsSight in the cluster
 func UpdateOpsSight(opssightClientset *opssightclientset.Clientset, namespace string, opssight *opssightapi.OpsSight) (*opssightapi.OpsSight, error) {
-	return opssightClientset.SynopsysV1().OpsSights(namespace).Update(opssight)
+	result := &opssightapi.OpsSight{}
+	req := opssightClientset.SynopsysV1().RESTClient().Put().Resource("opssights").Body(opssight).Name(opssight.Name)
+
+	if len(opssight.Namespace) > 0 {
+		req = req.Namespace(opssight.Namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // UpdateOpsSights will update a set of OpsSights in the cluster
@@ -789,19 +862,57 @@ func UpdateOpsSights(clientSet *opssightclientset.Clientset, opsSightCRDs []opss
 	return nil
 }
 
+// DeleteOpsSight will delete OpsSight in the cluster
+func DeleteOpsSight(clientSet *opssightclientset.Clientset, name string, namespace string, options *metav1.DeleteOptions) error {
+	req := clientSet.SynopsysV1().RESTClient().Delete().Resource("opssights").Name(name).Body(options)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+	return req.Do().Error()
+}
+
 // CreateAlert will create alert in the cluster
 func CreateAlert(alertClientset *alertclientset.Clientset, namespace string, createAlert *alertapi.Alert) (*alertapi.Alert, error) {
-	return alertClientset.SynopsysV1().Alerts(namespace).Create(createAlert)
+	result := &alertapi.Alert{}
+	req := alertClientset.SynopsysV1().RESTClient().Post().Resource("alerts").Body(createAlert)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // ListAlerts will list all alerts in the cluster
-func ListAlerts(clientSet *alertclientset.Clientset, namespace string) (*alertapi.AlertList, error) {
-	return clientSet.SynopsysV1().Alerts(namespace).List(metav1.ListOptions{})
+func ListAlerts(clientSet *alertclientset.Clientset, namespace string, opts metav1.ListOptions) (*alertapi.AlertList, error) {
+	result := &alertapi.AlertList{}
+	var timeout time.Duration
+	if opts.TimeoutSeconds != nil {
+		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
+	}
+	req := clientSet.SynopsysV1().RESTClient().Get().Resource("alerts").VersionedParams(&opts, scheme.ParameterCodec).Timeout(timeout)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // GetAlert will get Alert in the cluster
-func GetAlert(clientSet *alertclientset.Clientset, namespace string, name string) (*alertapi.Alert, error) {
-	return clientSet.SynopsysV1().Alerts(namespace).Get(name, metav1.GetOptions{})
+func GetAlert(clientSet *alertclientset.Clientset, namespace string, name string, options metav1.GetOptions) (*alertapi.Alert, error) {
+	result := &alertapi.Alert{}
+	req := clientSet.SynopsysV1().RESTClient().Get().Resource("alerts").Name(name).VersionedParams(&options, scheme.ParameterCodec)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // GetAlerts gets all alerts
@@ -811,7 +922,15 @@ func GetAlerts(clientSet *alertclientset.Clientset) (*alertapi.AlertList, error)
 
 // UpdateAlert will update an Alert in the cluster
 func UpdateAlert(clientSet *alertclientset.Clientset, namespace string, alert *alertapi.Alert) (*alertapi.Alert, error) {
-	return clientSet.SynopsysV1().Alerts(namespace).Update(alert)
+	result := &alertapi.Alert{}
+	req := clientSet.SynopsysV1().RESTClient().Put().Resource("alerts").Body(alert).Name(alert.Name)
+
+	if len(alert.Namespace) > 0 {
+		req = req.Namespace(alert.Namespace)
+	}
+
+	err := req.Do().Into(result)
+	return result, err
 }
 
 // UpdateAlerts will update a set of Alerts in the cluster
@@ -825,11 +944,21 @@ func UpdateAlerts(clientSet *alertclientset.Clientset, alertCRDs []alertapi.Aler
 	return nil
 }
 
+// DeleteAlert will delete Alert in the cluster
+func DeleteAlert(clientSet *alertclientset.Clientset, name string, namespace string, options *metav1.DeleteOptions) error {
+	req := clientSet.SynopsysV1().RESTClient().Delete().Resource("alerts").Name(name).Body(options)
+
+	if len(namespace) > 0 {
+		req = req.Namespace(namespace)
+	}
+	return req.Do().Error()
+}
+
 // ListHubPV will list all the persistent volumes attached to each hub in the cluster
 func ListHubPV(hubClientset *hubclientset.Clientset, namespace string) (map[string]string, error) {
 	var pvList map[string]string
 	pvList = make(map[string]string)
-	hubs, err := ListHubs(hubClientset, namespace)
+	hubs, err := ListBlackduck(hubClientset, namespace, metav1.ListOptions{})
 	if err != nil {
 		log.Errorf("unable to list the hubs due to %+v", err)
 		return pvList, err
@@ -1084,10 +1213,22 @@ func DeleteRoleBinding(clientset *kubernetes.Clientset, namespace string, name s
 // fails due to an error or due to being on kubernetes (doesn't support routes)
 func GetRouteClient(restConfig *rest.Config, clientset *kubernetes.Clientset, namespace string) *routeclient.RouteV1Client {
 	routeClient, err := routeclient.NewForConfig(restConfig)
-	if err != nil {
+	if routeClient == nil || err != nil {
 		return nil
 	}
-	return routeClient
+
+	ocVersion, err := GetOcVersion(clientset)
+	if err == nil && len(ocVersion) > 0 {
+		return routeClient
+	}
+
+	// if not within container, check using list routes to determine whether it is an OpenShift cluster
+	_, err = ListRoutes(routeClient, namespace, "")
+	if err == nil {
+		return routeClient
+	}
+
+	return nil
 }
 
 // GetRoute gets an OpenShift routes
@@ -1329,51 +1470,38 @@ func WaitUntilPodsAreReady(clientset *kubernetes.Clientset, namespace string, la
 		select {
 		case <-timeout.C:
 			// check right before the timeout; this will handle both when timeout is less than ticker; and also when timeout is not a multiple of 10 seconds
-			podsAreReady, err := ArePodsReady(clientset, namespace, labelSelector)
-			if err != nil {
-				return err
-			}
-			if podsAreReady == false {
+			err := IsPodReady(clientset, namespace, labelSelector)
+			if err == nil {
 				return nil
 			}
 			return fmt.Errorf("[NS: %s | Label: %s] the pods weren't ready - timing out after %d seconds", namespace, labelSelector, timeoutInSeconds)
 		case <-ticker.C:
 			// log.Debugf("Ticker ticked at: %v", time.Now())
-			podsAreReady, err := ArePodsReady(clientset, namespace, labelSelector)
-			if err != nil {
-				return err
-			}
-			if podsAreReady == true {
+			err := IsPodReady(clientset, namespace, labelSelector)
+			if err == nil {
 				return nil
 			}
 		}
 	}
 }
 
-// ArePodsReady returns whether the pods are ready or not. Returns an error if pods will never become ready.
-func ArePodsReady(clientset *kubernetes.Clientset, namespace string, labelSelector string) (bool, error) {
+// IsPodReady returns whether the pods are ready or not
+func IsPodReady(clientset *kubernetes.Clientset, namespace string, labelSelector string) error {
 	pods, err := clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	// Check if all the pods are ready
-	arePodsReady := true
 	for _, p := range pods.Items {
-		// Skip if a pod is in a failed or unknown state
-		if p.Status.Phase == corev1.PodFailed || p.Status.Phase == corev1.PodUnknown {
-			continue
-		}
-		// verify the pod is ready, otherwise set arePodsReady to false
 		for _, condition := range p.Status.Conditions {
 			if condition.Type == corev1.PodReady && condition.Status == corev1.ConditionFalse {
-				arePodsReady = false
+				return fmt.Errorf("[NS: %s | Label: %s] the pods weren't ready", namespace, labelSelector)
 			}
 		}
 	}
-	return arePodsReady, nil
+	return nil
 }
 
 // GetClusterScopeByName returns whether the CRD is cluster scope
@@ -1397,10 +1525,7 @@ func GetClusterScope(apiExtensionClient *apiextensionsclient.Clientset) bool {
 	return false
 }
 
-// GetOperatorNamespace uses labels to return the namespace of the synopsys operator based on
-// the provided namespace. In cluster scoped mode it will return the namespaces of all operators if provided
-// namespace=NamespaceAll. In namespace scoped mode it will return nil if there is no operator in
-// the namespace
+// GetOperatorNamespace returns the namespace of the synopsys operator based on the labels
 func GetOperatorNamespace(clientset *kubernetes.Clientset, namespace string) ([]string, error) {
 	namespaces := make(map[string]string, 0)
 	// check if operator is already installed
@@ -1555,14 +1680,20 @@ func GetKubernetesVersion(clientset *kubernetes.Clientset) (string, error) {
 	return "", err
 }
 
-// IsOpenshift will whether it is an openshift cluster
-func IsOpenshift(clientset *kubernetes.Clientset) bool {
-	body, err := clientset.Discovery().RESTClient().Get().AbsPath("/").Do().Raw()
+// GetOcVersion will return the version of openshift
+func GetOcVersion(clientset *kubernetes.Clientset) (string, error) {
+	body, err := clientset.Discovery().RESTClient().Get().AbsPath("/version/openshift").Do().Raw()
 	if err != nil {
-		return false
+		return "", err
 	}
 
-	return strings.Contains(string(body), "openshift")
+	var info version.Info
+	err = json.Unmarshal(body, &info)
+	if err != nil {
+		return "", fmt.Errorf("unable to parse the server version: %v", err)
+	}
+
+	return info.GitVersion, err
 }
 
 // IsOperatorExist returns whether the operator exist or not
@@ -1768,4 +1899,14 @@ func InitAnnotations(annotations map[string]string) map[string]string {
 		return make(map[string]string, 0)
 	}
 	return annotations
+}
+
+// IsOpenshift will whether it is an openshift cluster
+func IsOpenshift(clientset *kubernetes.Clientset) bool {
+	body, err := clientset.Discovery().RESTClient().Get().AbsPath("/").Do().Raw()
+	if err != nil {
+		return false
+	}
+
+	return strings.Contains(string(body), "openshift")
 }
