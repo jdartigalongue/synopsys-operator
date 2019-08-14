@@ -2,11 +2,14 @@
 runtimeobjectsgroupings:
   ConfigMap:
     - ConfigMap.blackduck.blackduck-config
+    - ConfigMap.blackduck.blackduck-db-config
   Secrets:
     - Secret.blackduck.blackduck-upload-cache
+    - Secret.blackduck.blackduck-db-creds
   Postgres:
-
-  Everything:
+    - ReplicationController.blackduck.blackduck-postgres
+    - Service.blackduck.blackduck-postgres
+  EverythingElse:
     - ReplicationController.blackduck.blackduck-registration
     - ReplicationController.blackduck.blackduck-scan
     - ReplicationController.blackduck.blackduck-webapp-logstash
@@ -30,15 +33,15 @@ runtimeobjectsgroupings:
     - Service.blackduck.uploadcache
 
 runtimeobjectdependencies:
-  - obj: AlertRC
+  - obj: EverythingElse
     isdependenton: ConfigMap
-  - obj: AlertRC
-    isdependenton: AlertSecret
-  - obj: CfsslRC
+  - obj: EverythingElse
+    isdependenton: Secrets
+  - obj: EverythingElse
+    isdependenton: Postgres
+  - obj: Postgres
     isdependenton: ConfigMap
-  #  - obj: ConfigMap
-  #    isdependenton: AlertSecret
-  - obj: AlertSecret
-    isdependenton: ConfigMap
+  - obj: Postgres
+    isdependenton: Secrets
 ---
 

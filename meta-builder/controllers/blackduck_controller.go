@@ -100,8 +100,7 @@ func (r *BlackduckReconciler) GetRuntimeObjects(cr interface{}) (map[string]runt
 
 func (r *BlackduckReconciler) GetInstructionManual() (*flying_dutchman.RuntimeObjectDependencyYaml, error) {
 	// 2. Create Instruction Manual From Runtime Objects
-	instructionManualFile := "https://raw.githubusercontent.com/yashbhutwala/kb-synopsys-operator/master/config/samples/dependency_sample_alert.yaml"
-	instructionManual, err := controllers_utils.CreateInstructionManual(instructionManualFile)
+	instructionManual, err := controllers_utils.CreateInstructionManual("config/samples/dependency_sample_blackduck.yaml")
 	if err != nil {
 		return nil, err
 	}

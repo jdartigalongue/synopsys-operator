@@ -1167,3 +1167,156 @@ metadata:
   namespace: blackduck
 type: Opaque
 
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  creationTimestamp: null
+  labels:
+    app: blackduck
+    component: postgres
+    name: blackduck
+  name: blackduck-postgres
+  namespace: blackduck
+spec:
+  replicas: 1
+  selector:
+    app: blackduck
+    component: postgres
+    name: blackduck
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: blackduck
+        component: postgres
+        name: blackduck
+      name: blackduck-postgres
+    spec:
+      containers:
+        - env:
+            - name: POSTGRESQL_MAX_CONNECTIONS
+              value: "300"
+            - name: POSTGRESQL_SHARED_BUFFERS
+              value: 1024MB
+            - name: POSTGRESQL_DATABASE
+              value: blackduck
+            - name: POSTGRESQL_USER
+              value: blackduck
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: HUB_POSTGRES_ADMIN_PASSWORD_FILE
+                  name: blackduck-db-creds
+            - name: POSTGRESQL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: HUB_POSTGRES_POSTGRES_PASSWORD_FILE
+                  name: blackduck-db-creds
+          envFrom:
+            - configMapRef:
+                name: blackduck-db-config
+          image: registry.access.redhat.com/rhscl/postgresql-96-rhel7:1
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - LD_LIBRARY_PATH=/opt/rh/rh-postgresql96/root/usr/lib64 /opt/rh/rh-postgresql96/root/usr/bin/pg_ctl
+                    -D /var/lib/pgsql/data/userdata -l logfile stop
+          name: blackduck-postgres
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - /opt/rh/rh-postgresql96/root/usr/bin/pg_isready -h localhost
+            failureThreshold: 10
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "1"
+              memory: 3072M
+          volumeMounts:
+            - mountPath: /var/lib/pgsql/data
+              name: postgres-data-volume
+      dnsPolicy: ClusterFirst
+      securityContext:
+        fsGroup: 0
+      terminationGracePeriodSeconds: 0
+      volumes:
+        - name: postgres-data-volume
+          persistentVolumeClaim:
+            claimName: blackduck-postgres
+status:
+  replicas: 0
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: blackduck
+    component: postgres
+    name: blackduck
+  name: blackduck-postgres
+  namespace: blackduck
+spec:
+  ports:
+    - name: port-5432
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+  selector:
+    app: blackduck
+    component: postgres
+    name: blackduck
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+data:
+  HUB_POSTGRES_ADMIN: blackduck
+  HUB_POSTGRES_ENABLE_SSL: "false"
+  HUB_POSTGRES_HOST: blackduck-postgres
+  HUB_POSTGRES_PORT: "5432"
+  HUB_POSTGRES_USER: blackduck_user
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    app: blackduck
+    component: postgres
+    name: blackduck
+    version: 2019.8.0
+  name: blackduck-db-config
+  namespace: blackduck
+
+---
+apiVersion: v1
+data:
+  HUB_POSTGRES_ADMIN_PASSWORD_FILE: dGVzdA==
+  HUB_POSTGRES_POSTGRES_PASSWORD_FILE: dGVzdA==
+  HUB_POSTGRES_USER_PASSWORD_FILE: dGVzdA==
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    app: blackduck
+    component: postgres
+    name: blackduck
+    version: 2019.8.0
+  name: blackduck-db-creds
+  namespace: blackduck
+type: Opaque
+

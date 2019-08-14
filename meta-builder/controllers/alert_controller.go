@@ -152,6 +152,5 @@ func (r *AlertReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	alertBuilder = alertBuilder.Owns(&corev1.Service{})
 	alertBuilder = alertBuilder.Owns(&corev1.ReplicationController{})
 	alertBuilder = alertBuilder.Owns(&corev1.Secret{})
-
 	return alertBuilder.Complete(r)
 }

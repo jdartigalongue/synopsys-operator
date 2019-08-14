@@ -27,6 +27,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -40,6 +41,9 @@ func init() {
 
 	_ = corev1.AddToScheme(scheme) // we've added this ourselves
 	_ = synopsysv1.AddToScheme(scheme)
+	scheme.AddKnownTypes(metav1.SchemeGroupVersion,
+		&metav1.List{},
+	)
 	// +kubebuilder:scaffold:scheme
 }
 

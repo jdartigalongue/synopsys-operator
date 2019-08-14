@@ -38,6 +38,7 @@ package controllers
 
 import (
 	synopsysv1 "github.com/blackducksoftware/synopsys-operator/meta-builder/api/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -57,9 +58,39 @@ type BlackduckPatcher struct {
 }
 
 func (p *BlackduckPatcher) patch() map[string]runtime.Object {
-
+	p.patchStorage()
+	p.patchLiveness()
 	return p.objects
 }
 
+func (p *BlackduckPatcher) patchLiveness() error {
+	// Removes liveness probes if Spec.LivenessProbes is set to false
+	for _, v := range p.objects {
+		switch v.(type) {
+		case *v1.ReplicationController:
+			if !p.blackduck.Spec.LivenessProbes {
+				for i := range v.(*v1.ReplicationController).Spec.Template.Spec.Containers {
+					v.(*v1.ReplicationController).Spec.Template.Spec.Containers[i].LivenessProbe = nil
+				}
+			}
+		}
+	}
+	return nil
+}
+
+
+func (p *BlackduckPatcher) patchStorage() error {
+	for _, v := range p.objects {
+		switch v.(type) {
+		case *v1.ReplicationController:
+			if !p.blackduck.Spec.PersistentStorage {
+				for v := range v.(*v1.ReplicationController).Spec.Template.Spec.Volumes{
+					//v.(*v1.ReplicationController).Spec.Template.Spec.Volumes[v].VolumeSource = nil
+				}
+			}
+		}
+	}
+	return nil
+}
 
 // TODO: Create functions to patch the remaining spec fields
