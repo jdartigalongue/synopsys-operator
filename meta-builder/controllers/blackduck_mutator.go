@@ -44,17 +44,15 @@ import (
 
 func patchBlackduck(blackduck *synopsysv1.Blackduck, objects map[string]runtime.Object) map[string]runtime.Object {
 	patcher := BlackduckPatcher{
-		blackduck:   blackduck,
-		objects: objects,
+		blackduck: blackduck,
+		objects:   objects,
 	}
 	return patcher.patch()
 }
 
-
-
 type BlackduckPatcher struct {
-	blackduck   *synopsysv1.Blackduck
-	objects map[string]runtime.Object
+	blackduck *synopsysv1.Blackduck
+	objects   map[string]runtime.Object
 }
 
 func (p *BlackduckPatcher) patch() map[string]runtime.Object {
@@ -78,15 +76,14 @@ func (p *BlackduckPatcher) patchLiveness() error {
 	return nil
 }
 
-
 func (p *BlackduckPatcher) patchStorage() error {
 	for _, v := range p.objects {
 		switch v.(type) {
 		case *v1.ReplicationController:
 			if !p.blackduck.Spec.PersistentStorage {
-				for v := range v.(*v1.ReplicationController).Spec.Template.Spec.Volumes{
-					//v.(*v1.ReplicationController).Spec.Template.Spec.Volumes[v].VolumeSource = nil
-				}
+				//for v := range v.(*v1.ReplicationController).Spec.Template.Spec.Volumes {
+				//	//v.(*v1.ReplicationController).Spec.Template.Spec.Volumes[v].VolumeSource = nil
+				//}
 			}
 		}
 	}

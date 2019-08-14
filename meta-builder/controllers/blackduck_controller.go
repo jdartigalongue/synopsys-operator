@@ -38,7 +38,7 @@ import (
 type BlackduckReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
-	Log logr.Logger
+	Log    logr.Logger
 }
 
 func (r *BlackduckReconciler) GetClient() client.Client {
