@@ -1,13 +1,34 @@
 ---
 runtimeobjectsgroupings:
   ConfigMap:
-    - ConfigMap.default.demo-alert-blackduck-config
-  AlertRC:
-    - ReplicationController.default.demo-alert-alert
-  CfsslRC:
-    - ReplicationController.default.demo-alert-cfssl
-  AlertSecret:
-    - Secret.default.demo-alert-secret
+    - ConfigMap.blackduck.blackduck-config
+  Secrets:
+    - Secret.blackduck.blackduck-upload-cache
+  Postgres:
+
+  Everything:
+    - ReplicationController.blackduck.blackduck-registration
+    - ReplicationController.blackduck.blackduck-scan
+    - ReplicationController.blackduck.blackduck-webapp-logstash
+    - Service.blackduck.authentication
+    - ReplicationController.blackduck.blackduck-cfssl
+    - Service.blackduck.blackduck-scan
+    - Secret.blackduck.blackduck-webserver-certificate
+    - ReplicationController.blackduck.blackduck-webserver
+    - ReplicationController.blackduck.blackduck-jobrunner
+    - Service.blackduck.blackduck-cfssl
+    - Service.blackduck.blackduck-documentation
+    - Service.blackduck.blackduck-registration
+    - Service.blackduck.webapp
+    - Service.blackduck.blackduck-logstash
+    - ReplicationController.blackduck.blackduck-documentation
+    - ReplicationController.blackduck.blackduck-zookeeper
+    - ReplicationController.blackduck.blackduck-authentication
+    - ReplicationController.blackduck.blackduck-uploadcache
+    - Service.blackduck.blackduck-webserver
+    - Service.blackduck.blackduck-zookeeper
+    - Service.blackduck.uploadcache
+
 runtimeobjectdependencies:
   - obj: AlertRC
     isdependenton: ConfigMap

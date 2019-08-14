@@ -75,7 +75,7 @@ func (r *BlackduckReconciler) GetRuntimeObjects(cr interface{}) (map[string]runt
 	// if err != nil {
 	// 	return nil, err
 	// }
-	FinalYamlPath := "config/samples/alert_runtime_objects.yaml"
+	FinalYamlPath := "config/samples/blackduck_runtime_objects.yaml"
 	byteArrayContentFromFile, err := ioutil.ReadFile(FinalYamlPath)
 	if err != nil {
 		return nil, err

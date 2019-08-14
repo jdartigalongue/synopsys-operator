@@ -52,6 +52,12 @@ type BlackduckSpec struct {
 	PostgresPassword      string                    `json:"postgresPassword"`
 }
 
+type RegistryConfiguration struct {
+	Registry    string   `json:"registry"`
+	Namespace   string   `json:"namespace"`
+	PullSecrets []string `json:"pullSecrets"`
+}
+
 // Environs will hold the list of Environment variables
 type Environs struct {
 	Key   string `json:"key"`
