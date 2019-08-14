@@ -65,14 +65,14 @@ func main() {
 
 	// TODO: wrapper for --enable-alert condition
 	// setting up Alert Controller
-	if err = (&controllers.AlertReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Alert"),
-		Scheme: mgr.GetScheme(), // we've added this ourselves
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Alert")
-		os.Exit(1)
-	}
+	//if err = (&controllers.AlertReconciler{
+	//	Client: mgr.GetClient(),
+	//	Log:    ctrl.Log.WithName("controllers").WithName("Alert"),
+	//	Scheme: mgr.GetScheme(), // we've added this ourselves
+	//}).SetupWithManager(mgr); err != nil {
+	//	setupLog.Error(err, "unable to create controller", "controller", "Alert")
+	//	os.Exit(1)
+	//}
 
 	// TODO: wrapper for --enable-blackduck condition
 	// setting up Black Duck Controller
@@ -84,13 +84,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.OpsSightReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("OpsSight"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "OpsSight")
-		os.Exit(1)
-	}
+	//if err = (&controllers.OpsSightReconciler{
+	//	Client: mgr.GetClient(),
+	//	Log:    ctrl.Log.WithName("controllers").WithName("OpsSight"),
+	//}).SetupWithManager(mgr); err != nil {
+	//	setupLog.Error(err, "unable to create controller", "controller", "OpsSight")
+	//	os.Exit(1)
+	//}
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")
