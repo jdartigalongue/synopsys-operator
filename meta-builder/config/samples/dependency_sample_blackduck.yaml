@@ -6,6 +6,9 @@ runtimeobjectsgroupings:
   Secrets:
     - Secret.blackduck.blackduck-upload-cache
     - Secret.blackduck.blackduck-db-creds
+  InitJob:
+    - ConfigMap.blackduck.postgres-init-config
+    - Job.blackduck.blackduck-init-postgres
   Postgres:
     - ReplicationController.blackduck.blackduck-postgres
     - Service.blackduck.blackduck-postgres
@@ -38,6 +41,10 @@ runtimeobjectdependencies:
   - obj: EverythingElse
     isdependenton: Secrets
   - obj: EverythingElse
+    isdependenton: Postgres
+  - obj: EverythingElse
+    isdependenton: InitJob
+  - obj: InitJob
     isdependenton: Postgres
   - obj: Postgres
     isdependenton: ConfigMap

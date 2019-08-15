@@ -39,6 +39,7 @@ package controllers
 import (
 	synopsysv1 "github.com/blackducksoftware/synopsys-operator/meta-builder/api/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -56,9 +57,18 @@ type BlackduckPatcher struct {
 }
 
 func (p *BlackduckPatcher) patch() map[string]runtime.Object {
+	p.patchNamespace()
 	p.patchStorage()
 	p.patchLiveness()
 	return p.objects
+}
+
+func (p *BlackduckPatcher) patchNamespace() error {
+	accessor := meta.NewAccessor()
+	for _, runtimeObject := range p.objects {
+		accessor.SetNamespace(runtimeObject, p.blackduck.Spec.Namespace)
+	}
+	return nil
 }
 
 func (p *BlackduckPatcher) patchLiveness() error {
@@ -81,9 +91,14 @@ func (p *BlackduckPatcher) patchStorage() error {
 		switch v.(type) {
 		case *v1.ReplicationController:
 			if !p.blackduck.Spec.PersistentStorage {
-				//for v := range v.(*v1.ReplicationController).Spec.Template.Spec.Volumes {
-				//	//v.(*v1.ReplicationController).Spec.Template.Spec.Volumes[v].VolumeSource = nil
-				//}
+				for i := range v.(*v1.ReplicationController).Spec.Template.Spec.Volumes {
+					v.(*v1.ReplicationController).Spec.Template.Spec.Volumes[i].VolumeSource = v1.VolumeSource{
+						EmptyDir: &v1.EmptyDirVolumeSource{
+							Medium:    v1.StorageMediumDefault,
+							SizeLimit: nil,
+						},
+					}
+				}
 			}
 		}
 	}
