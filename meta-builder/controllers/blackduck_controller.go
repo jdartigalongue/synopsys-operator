@@ -41,6 +41,10 @@ type BlackduckReconciler struct {
 	Log    logr.Logger
 }
 
+var (
+	apiGVStr = synopsysv1.GroupVersion.String()
+)
+
 func (r *BlackduckReconciler) GetClient() client.Client {
 	return r.Client
 }
@@ -98,9 +102,9 @@ func (r *BlackduckReconciler) GetRuntimeObjects(cr interface{}) (map[string]runt
 	return objs, nil
 }
 
-func (r *BlackduckReconciler) GetInstructionManual() (*flying_dutchman.RuntimeObjectDependencyYaml, error) {
+func (r *BlackduckReconciler) GetInstructionManual(obj map[string]runtime.Object) (*flying_dutchman.RuntimeObjectDependencyYaml, error) {
 	// 2. Create Instruction Manual From Runtime Objects
-	instructionManual, err := controllers_utils.CreateInstructionManual("config/samples/dependency_sample_blackduck.yaml")
+	instructionManual, err := controllers_utils.CreateInstructionManual(obj)
 	if err != nil {
 		return nil, err
 	}

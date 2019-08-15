@@ -2,6 +2,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: cfssl
@@ -67,6 +70,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: webserver
@@ -142,6 +148,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: documentation
@@ -207,6 +216,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: registration
@@ -280,6 +292,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: zookeeper
@@ -351,6 +366,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: jobrunner
@@ -438,6 +456,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: scan
@@ -527,6 +548,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: authentication
@@ -621,6 +645,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: webapp-logstash
@@ -747,6 +774,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: uploadcache
@@ -832,6 +862,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: cfssl
@@ -858,6 +891,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: webserver
@@ -884,6 +920,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: documentation
@@ -910,6 +949,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: registration
@@ -936,6 +978,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: zookeeper
@@ -962,6 +1007,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: scan
@@ -988,6 +1036,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: authentication
@@ -1014,6 +1065,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: webapp-logstash
@@ -1040,6 +1094,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: webapp-logstash
@@ -1066,6 +1123,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "EverythingElse"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secrets, Postgres, InitJob"
   labels:
     app: blackduck
     component: uploadcache
@@ -1126,6 +1186,9 @@ data:
 kind: ConfigMap
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "ConfigMap"
+    operator.synopsys.com/group-dependencies: ""
   labels:
     app: blackduck
     component: configmap
@@ -1142,6 +1205,9 @@ data:
 kind: Secret
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "Secret"
+    operator.synopsys.com/group-dependencies: ""
   labels:
     app: blackduck
     component: secret
@@ -1158,6 +1224,9 @@ data:
 kind: Secret
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "Secret"
+    operator.synopsys.com/group-dependencies: ""
   labels:
     app: blackduck
     component: uploadcache
@@ -1172,6 +1241,9 @@ apiVersion: v1
 kind: ReplicationController
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "Postgres"
+    operator.synopsys.com/group-dependencies: "ConfigMap, Secret"
   labels:
     app: blackduck
     component: postgres
@@ -1263,6 +1335,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "Postgres"
+    operator.synopsys.com/group-dependencies: "ConfigMap,Secret"
   labels:
     app: blackduck
     component: postgres
@@ -1294,6 +1369,9 @@ data:
 kind: ConfigMap
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "ConfigMap"
+    operator.synopsys.com/group-dependencies: ""
   labels:
     app: blackduck
     component: postgres
@@ -1311,6 +1389,9 @@ data:
 kind: Secret
 metadata:
   creationTimestamp: null
+  annotations:
+    operator.synopsys.com/group-id: "Secret"
+    operator.synopsys.com/group-dependencies: ""
   labels:
     app: blackduck
     component: postgres
@@ -1324,6 +1405,9 @@ type: Opaque
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  annotations:
+    operator.synopsys.com/group-id: "InitJob"
+    operator.synopsys.com/group-dependencies: "Postgres"
   name: postgres-init-config
   namespace: blackduck
 data:
@@ -1400,6 +1484,9 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
+  annotations:
+    operator.synopsys.com/group-id: "InitJob"
+    operator.synopsys.com/group-dependencies: "Postgres"
   name: blackduck-init-postgres
   namespace: blackduck
 spec:

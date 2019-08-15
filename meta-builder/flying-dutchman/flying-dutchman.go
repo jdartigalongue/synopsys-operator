@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	scheduler "github.com/blackducksoftware/synopsys-operator/go-scheduler"
 	"github.com/go-logr/logr"
-	scheduler "github.com/yashbhutwala/go-scheduler"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -31,7 +31,7 @@ type MetaReconcilerInterface interface {
 	// GetRuntimeObjects expects that the implementer returns a map of uniqueId to runtime.Object to schedule to the api-server
 	GetRuntimeObjects(interface{}) (map[string]runtime.Object, error)
 	// GetInstructionManual expects that the implementer returns a pointer to the instruction manual
-	GetInstructionManual() (*RuntimeObjectDependencyYaml, error)
+	GetInstructionManual(map[string]runtime.Object) (*RuntimeObjectDependencyYaml, error)
 }
 
 // MetaReconcile takes as input a request and an implementer of MetaReconcilerInterface
@@ -60,7 +60,7 @@ func MetaReconcile(req ctrl.Request, mri MetaReconcilerInterface) (ctrl.Result, 
 	}
 
 	// get the instruction manual
-	instructionManual, err := mri.GetInstructionManual()
+	instructionManual, err := mri.GetInstructionManual(mapOfUniqueIdToDesiredRuntimeObject)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
