@@ -92,11 +92,14 @@ func (p *BlackduckPatcher) patchStorage() error {
 		case *v1.ReplicationController:
 			if !p.blackduck.Spec.PersistentStorage {
 				for i := range v.(*v1.ReplicationController).Spec.Template.Spec.Volumes {
-					v.(*v1.ReplicationController).Spec.Template.Spec.Volumes[i].VolumeSource = v1.VolumeSource{
-						EmptyDir: &v1.EmptyDirVolumeSource{
-							Medium:    v1.StorageMediumDefault,
-							SizeLimit: nil,
-						},
+					// If PersistentVolumeClaim then we change it to emptyDir
+					if v.(*v1.ReplicationController).Spec.Template.Spec.Volumes[i].VolumeSource.PersistentVolumeClaim != nil {
+						v.(*v1.ReplicationController).Spec.Template.Spec.Volumes[i].VolumeSource = v1.VolumeSource{
+							EmptyDir: &v1.EmptyDirVolumeSource{
+								Medium:    v1.StorageMediumDefault,
+								SizeLimit: nil,
+							},
+						}
 					}
 				}
 			}
